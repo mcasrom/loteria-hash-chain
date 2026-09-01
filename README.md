@@ -17,13 +17,13 @@ el test `ALTERAR UN IMPORTE EN BD ROMPE LA VERIFICACIÓN`.
 ```bash
 npm install
 npm run seed      # crea décimo 85432 (20€) + 3 participaciones (10+5+5)
-npm start         # server en http://localhost:3000
+npm start         # server en http://localhost:3005
 npm test          # 4 tests, incluido el de manipulación
 ```
 
 ### Docker
 ```bash
-docker compose up --build   # levanta en localhost:3000
+docker compose up --build   # levanta en localhost:3005
 ```
 > Nota: el build de Docker necesita red (apt-get instala build-essential para
 > better-sqlite3). Si falla por DNS, usar la vía local.

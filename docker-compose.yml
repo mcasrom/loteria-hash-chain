@@ -5,10 +5,10 @@ services:
     build: .
     container_name: loteria-hash-chain
     ports:
-      - "3000:3000"
+      - "3005:3005"
     environment:
       - DB_PATH=/data/loteria.db
-      - PORT=3000
+      - PORT=3005
     volumes:
       - ./data:/data
     # en local: la BD queda en ./data (persistente en el host)

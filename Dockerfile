@@ -16,5 +16,5 @@ COPY . .
 ENV DB_PATH=/data/loteria.db
 RUN mkdir -p /data
 
-EXPOSE 3000
+EXPOSE 3005
 CMD ["node", "src/app.js"]

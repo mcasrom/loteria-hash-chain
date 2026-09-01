@@ -61,6 +61,9 @@ main{max-width:620px;margin:0 auto}
 </div>
 ${chain.ok ? '' : '<div class="card" style="border-color:#dc2626"><p style="color:#b91c1c"><b>⚠ Se detectó manipulación.</b> La cadena está rota: los importes registrados NO coinciden con los originalmente emitidos. No son fiables.</p></div>'}
 <p class="muted">La integridad se verifica encadenando cada participación por su hash (SHA-256). Cualquier alteración de un importe en la base rompe la cadena y esta página lo muestra.</p>
+<div style="text-align:center;margin-top:20px;padding:10px 0">
+  <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>
+</div>
 </main>
 </body></html>`;
   res.send(html);

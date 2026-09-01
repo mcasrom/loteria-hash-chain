@@ -84,6 +84,11 @@ router.get('/', (req, res) => {
 <meta name="description" content="Deja constancia de quién participa en un sorteo, boleto o reparto compartido, cuánto aporta y qué porcentaje le corresponde. Cada partícipe recibe un comprobante privado con QR y PDF.">
 <meta property="og:title" content="Registro verificable de participaciones">
 <meta property="og:description" content="Comparte un boleto. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
+<meta property="og:image" content="https://pruebapublica.com/assets/og-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <style>
 :root{--bg:#070b18;--bg2:#0d1528;--card:#101b33;--card2:#0a1226;--line:#1c2a47;--line2:#26365a;
 --fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171;
@@ -261,7 +266,9 @@ footer a{color:var(--accent);text-decoration:none}
 <footer>
   <b>Registro verificable de participaciones</b> · Para décimos, rifas, botes, apuestas y repartos compartidos<br>
   <a href="#registrar">Crear un registro</a> · <a href="#como">Cómo funciona</a> · <a href="#confianza">Privacidad y seguridad</a> · <a href="mailto:info@viajeinteligencia.com">info@viajeinteligencia.com</a><br>
-  <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Proyecto independiente y de código abierto</span>
+  <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Proyecto independiente y de código abierto</span><br><br>
+  <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer"
+     style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;margin-top:6px;text-decoration:none">☕ Invítame a un café</a>
 </footer>
 </div>
 <script>
@@ -280,7 +287,6 @@ footer a{color:var(--accent);text-decoration:none}
     apply(cur);
     try { localStorage.setItem('tema', cur); } catch(e){}
   };
-})();
 </script>
 </body></html>`);
 });
@@ -407,6 +413,9 @@ async function eliminarUltima(did){
   btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
 })();
 </script>
+<div style="text-align:center;margin-top:20px;padding:10px 0">
+  <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>
+</div>
 </body></html>`);
 });
 
@@ -466,8 +475,10 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
   apply(saved==='light'?'light':'dark');
   btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
-})();
 </script>
+<div style="text-align:center;margin-top:20px;padding:10px 0">
+  <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>
+</div>
 </body></html>`);
 });
 
@@ -523,8 +534,10 @@ router.get('/mi-participacion/:token', (req, res) => {
   var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
   apply(saved==='light'?'light':'dark');
   btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
-})();
 </script>
+<div style="text-align:center;margin-top:20px;padding:10px 0">
+  <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>
+</div>
 </body></html>`);
 });
 

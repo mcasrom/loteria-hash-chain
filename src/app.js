@@ -9,6 +9,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Assets estáticos (favicon, og:image) — servir desde /assets
+const path = require('path');
+app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
+
 const db = openDb();
 
 // Página de visualización + API

@@ -41,7 +41,8 @@ function resumen(decimoId) {
 }
 function base(req) { return `${req.protocol}://${req.get('host')}`; }
 const css = `<style>
-:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--fg:#e2e8f0;--mut:#94a3b8;--accent:#2563eb}
+:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--fg:#e2e8f0;--mut:#94a3b8;--accent:#2563eb;--accent2:#3b82f6}
+[data-theme="light"]{--bg:#f6f8fc;--card:#ffffff;--line:#dde4f0;--fg:#16213a;--mut:#5b6b85;--accent:#2563eb;--accent2:#2563eb}
 *{box-sizing:border-box}
 body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:24px;line-height:1.5}
 main{max-width:680px;margin:0 auto}
@@ -50,10 +51,11 @@ h1{font-size:26px;margin:0 0 4px}.muted{color:var(--mut);font-size:13px;margin:2
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0}
 .badge{padding:4px 12px;border-radius:20px;font-weight:700;font-size:12px;white-space:nowrap}
 .ok{background:#052e16;color:#4ade80}.bad{background:#450a0a;color:#f87171}
+[data-theme="light"] .ok{background:#dcfce7;color:#166534}[data-theme="light"] .bad{background:#fee2e2;color:#991b1b}
 .kpis{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
-.kpi{flex:1;min-width:100px;background:#0f172a;border-radius:10px;padding:10px 14px;text-align:center}
+.kpi{flex:1;min-width:100px;background:var(--bg);border-radius:10px;padding:10px 14px;text-align:center}
 .kpi b{display:block;font-size:18px}.kpi span{font-size:11px;color:var(--mut)}
-.bar{height:8px;background:#334155;border-radius:4px;overflow:hidden;margin:6px 0 16px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 16px}
 .bar>div{height:100%;background:linear-gradient(90deg,#2563eb,#4ade80);border-radius:4px}
 table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px}
 td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
@@ -62,14 +64,16 @@ th{color:var(--mut);font-weight:600;font-size:12px}
 .del-btn:hover{background:rgba(248,113,113,.15);border-color:#f87171}
 .share-btn{background:transparent;border:1px solid var(--line);color:var(--accent);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px}
 .share-btn:hover{background:rgba(59,130,246,.15);border-color:var(--accent)}
-.join{background:#0f172a;border:1px dashed var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.join{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:16px;margin-top:12px}
 .join-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .join input{flex:1;min-width:120px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:14px}
 .join button{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer}
 .msg{font-size:13px;margin-top:8px}.msg.ok{color:#4ade80}.msg.err{color:#f87171}
 a{color:#60a5fa}
+[data-theme="light"] a{color:#2563eb}
 .btn{display:inline-block;background:var(--accent);color:#fff;padding:11px 18px;border-radius:8px;font-weight:700;text-decoration:none}
 .btn-line{display:inline-block;padding:11px 18px;border-radius:8px;font-weight:700;text-decoration:none;border:1px solid var(--line)}
+.theme-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:16px;margin-right:10px}
 </style>`;
 
 // 1. Raíz: landing completa y pulida (genérica para cualquier sorteo)
@@ -368,7 +372,7 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
 });
 function compartir(link, nombre, did){
   var texto = '🎟️ Tu participación está registrada. Abre tu comprobante aquí: ' + link;
-  var op = confirm('Compartir con ' + nombre + ':\n\n[OK] Copiar enlace\n[Cancelar] Abrir WhatsApp con el mensaje listo');
+  var op = confirm('Compartir con ' + nombre + ':\\n\\n[OK] Copiar enlace\\n[Cancelar] Abrir WhatsApp con el mensaje listo');
   if (op) {
     // copiar al portapapeles
     (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject())
@@ -390,6 +394,17 @@ async function eliminarUltima(did){
   alert('Participación eliminada: '+(data.eliminada.nombre||'Anónimo')+' ('+data.eliminada.importe.toFixed(2)+'€)');
   location.reload();
 }
+(function(){
+  var root=document.documentElement;
+  var btn=document.createElement('button');
+  btn.className='theme-btn'; btn.title='Cambiar tema';
+  btn.style.cssText='position:fixed;top:14px;right:14px;z-index:50;';
+  document.body.appendChild(btn);
+  function apply(t){ if(t==='light'){root.setAttribute('data-theme','light');btn.textContent='☀️';} else {root.removeAttribute('data-theme');btn.textContent='🌙';} }
+  var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
+  apply(saved==='light'?'light':'dark');
+  btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
+})();
 </script>
 </body></html>`);
 });
@@ -439,6 +454,17 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   msg.className='msg ok';
   msg.innerHTML='✓ Aportación registrada. <a href="/mi-participacion/'+data.access_token+'"><b>Ver y descargar TU comprobante →</b></a>';
 });
+(function(){
+  var root=document.documentElement;
+  var btn=document.createElement('button');
+  btn.className='theme-btn'; btn.title='Cambiar tema';
+  btn.style.cssText='position:fixed;top:14px;right:14px;z-index:50;';
+  document.body.appendChild(btn);
+  function apply(t){ if(t==='light'){root.setAttribute('data-theme','light');btn.textContent='☀️';} else {root.removeAttribute('data-theme');btn.textContent='🌙';} }
+  var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
+  apply(saved==='light'?'light':'dark');
+  btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
+})();
 </script>
 </body></html>`);
 });
@@ -480,9 +506,23 @@ router.get('/mi-participacion/:token', (req, res) => {
     <a href="/mi-participacion/${token}/pdf" class="btn">📄 Descargar PDF</a>
     <a href="${linkVerif}" class="btn-line">🔍 Verificar el décimo</a>
   </div>
-  <p class="muted" style="margin-top:14px">Comparte tu imagen o PDF por WhatsApp. El QR apunta a la verificación pública (anónima).</p>
+  <p class="muted" style="margin-top:14px">Comparte tu imagen o PDF por WhatsApp. El QR apunta a tu comprobante privado.</p>
 </div>
-</main></body></html>`);
+</main>
+<script>
+(function(){
+  var root=document.documentElement;
+  var btn=document.createElement('button');
+  btn.className='theme-btn'; btn.title='Cambiar tema';
+  btn.style.cssText='position:fixed;top:14px;right:14px;z-index:50;';
+  document.body.appendChild(btn);
+  function apply(t){ if(t==='light'){root.setAttribute('data-theme','light');btn.textContent='☀️';} else {root.removeAttribute('data-theme');btn.textContent='🌙';} }
+  var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
+  apply(saved==='light'?'light':'dark');
+  btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
+})();
+</script>
+</body></html>`);
 });
 
 // Descargas del comprobante — SOLO via access_token (misma ruta, con rate-limit)

@@ -93,7 +93,7 @@ nav a:hover{color:var(--fg)}
 /* HERO */
 .hero{text-align:center;padding:64px 0 48px}
 .hero .badge{display:inline-block;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--ok);font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:30px;margin-bottom:18px}
-.hero h1{font-size:44px;line-height:1.15;margin:0 0 16px;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1{font-size:40px;line-height:1.18;margin:0 0 16px;text-wrap:balance;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{font-size:18px;color:var(--mut);max-width:620px;margin:0 auto}
 .hero .sub-badges{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero .sub-badges span{font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 14px}
@@ -257,7 +257,8 @@ footer a{color:var(--accent);text-decoration:none}
 
 <footer>
   <b>Participaciones de sorteos con comprobante</b> · Cualquier evento: sorteos, rifas, apuestas, solidario<br>
-  <a href="#crear">Crear sorteo</a> · <a href="#metodo">Metodología</a> · Open source · Los servidores los paga su autor
+  <a href="#crear">Crear sorteo</a> · <a href="#metodo">Metodología</a> · <a href="mailto:info@viajeinteligencia.com">info@viajeinteligencia.com</a><br>
+  <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Open source · Los servidores los paga su autor</span>
 </footer>
 </div>
 </body></html>`);

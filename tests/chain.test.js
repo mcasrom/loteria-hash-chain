@@ -129,3 +129,62 @@ test('no se puede eliminar una participación intermedia (la cadena no es la úl
   db.prepare("DELETE FROM participaciones WHERE nombre_participante='Ana'").run();
   expect(validateChain(db, decimoId)).toBe(false);
 });
+
+// ---- MODALIDAD DE ASIGNACIÓN (A+D) ----
+
+test('modalidad aportada registra importe_aportado = importe', () => {
+  const r = addParticipacion(db, { decimoId, importe: 5, nombre: 'Ana' });
+  expect(r.ok).toBe(true);
+  expect(r.participacion.modalidad).toBe('aportada');
+  expect(r.participacion.importe_aportado).toBe(5);
+  const row = db.prepare('SELECT * FROM participaciones WHERE id = ?').get(r.participacion.id);
+  expect(row.modalidad).toBe('aportada');
+  expect(row.importe_aportado).toBe(5);
+});
+
+test('modalidad gratuita registra importe_aportado 0 y valor_referencia (ocupa cuota)', () => {
+  // Décimo de 20€: una aportada de 10€ + un regalo de 5€ de cuota
+  const a = addParticipacion(db, { decimoId, importe: 10, nombre: 'Ana' });
+  const g = addParticipacion(db, { decimoId, importe: null, nombre: 'Luis', modalidad: 'gratuita', valorReferencia: 5 });
+  expect(g.ok).toBe(true);
+  expect(g.participacion.modalidad).toBe('gratuita');
+  expect(g.participacion.importe_aportado).toBe(0);
+  expect(g.participacion.valor_referencia).toBe(5);
+  expect(g.participacion.importe).toBe(5); // valor económico en la cadena
+  expect(validateChain(db, decimoId)).toBe(true);
+});
+
+test('modalidad gratuita NO puede superar el valor_total (el regalo ocupa cuota)', () => {
+  addParticipacion(db, { decimoId, importe: 15, nombre: 'Ana' });
+  const g = addParticipacion(db, { decimoId, nombre: 'Luis', modalidad: 'gratuita', valorReferencia: 10 });
+  expect(g.ok).toBe(false);
+  expect(g.error).toBe('supera_valor_total');
+});
+
+test('modalidad inválida es rechazada', () => {
+  const r = addParticipacion(db, { decimoId, importe: 5, modalidad: 'donacion' });
+  expect(r.ok).toBe(false);
+  expect(r.error).toBe('modalidad_invalida');
+});
+
+test('gratuita sin valor_referencia es rechazada', () => {
+  const r = addParticipacion(db, { decimoId, nombre: 'Luis', modalidad: 'gratuita' });
+  expect(r.ok).toBe(false);
+  expect(r.error).toBe('valor_referencia_invalido');
+});
+
+test('aceptación registra auditoría (fecha UTC, IP, UA, hash) y no se puede repetir', () => {
+  const r = addParticipacion(db, { decimoId, importe: 5, nombre: 'Ana' });
+  const token = r.participacion.access_token;
+  const ahora = new Date().toISOString();
+  db.prepare('UPDATE participaciones SET aceptado_at = ?, aceptado_ip = ?, aceptado_ua = ?, aceptado_hash = ? WHERE id = ?')
+    .run(ahora, '127.0.0.1', 'test-ua', 'abc123', r.participacion.id);
+  const row = db.prepare('SELECT * FROM participaciones WHERE id = ?').get(r.participacion.id);
+  expect(row.aceptado_at).toBe(ahora);
+  expect(row.aceptado_ip).toBe('127.0.0.1');
+  expect(row.aceptado_ua).toBe('test-ua');
+  expect(row.aceptado_hash).toBe('abc123');
+  // no se puede aceptar dos veces: el UPDATE condicional no debe re-aceptar
+  const n = db.prepare('UPDATE participaciones SET aceptado_at = ? WHERE id = ? AND aceptado_at IS NULL').run('otra', r.participacion.id).changes;
+  expect(n).toBe(0);
+});

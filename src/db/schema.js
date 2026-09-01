@@ -23,7 +23,14 @@ CREATE TABLE IF NOT EXISTS participaciones (
   hash_anterior TEXT NOT NULL,
   hash_actual TEXT NOT NULL,
   created_at TEXT NOT NULL,
-  access_token TEXT NOT NULL UNIQUE
+  access_token TEXT NOT NULL UNIQUE,
+  modalidad TEXT NOT NULL DEFAULT 'aportada',
+  importe_aportado REAL NULL,
+  valor_referencia REAL NULL,
+  aceptado_at TEXT NULL,
+  aceptado_ip TEXT NULL,
+  aceptado_ua TEXT NULL,
+  aceptado_hash TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -44,7 +51,25 @@ function openDb() {
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
   db.exec(SCHEMA);
+  migrar(db);
   return db;
+}
+
+// Migración suave: añade columnas nuevas a BDs creadas con un esquema antiguo.
+function migrar(db) {
+  const cols = db.prepare(`PRAGMA table_info(participaciones)`).all().map((c) => c.name);
+  const nuevas = {
+    modalidad: "TEXT NOT NULL DEFAULT 'aportada'",
+    importe_aportado: 'REAL NULL',
+    valor_referencia: 'REAL NULL',
+    aceptado_at: 'TEXT NULL',
+    aceptado_ip: 'TEXT NULL',
+    aceptado_ua: 'TEXT NULL',
+    aceptado_hash: 'TEXT NULL',
+  };
+  for (const [name, def] of Object.entries(nuevas)) {
+    if (!cols.includes(name)) db.exec(`ALTER TABLE participaciones ADD COLUMN ${name} ${def}`);
+  }
 }
 
 module.exports = { openDb, DB_PATH: DB_PATH_DEFAULT };

@@ -74,12 +74,31 @@ function validateChain(db, decimoId) {
 /**
  * Crea una participación. Rechaza si:
  *  - el décimo no existe;
- *  - la suma de importes ya emitidos + el nuevo importe supera valor_total.
+ *  - la suma de importes ya emitidos + el nuevo importe supera valor_total;
+ *  - modalidad 'aportada' (default): importe > 0 es el dinero entregado.
+ *  - modalidad 'gratuita': importe_aportado es 0, valor_referencia (>0) es el
+ *    valor económico de la cuota regalada (para calcular el % y el control del 100%).
  * Devuelve { ok, error?, participacion? }
  */
-function addParticipacion(db, { decimoId, importe, nombre = null }) {
-  if (typeof importe !== 'number' || importe <= 0 || !Number.isFinite(importe)) {
-    return { ok: false, error: 'importe_invalido' };
+function addParticipacion(db, { decimoId, importe, nombre = null, modalidad = 'aportada', importeAportado = null, valorReferencia = null }) {
+  if (modalidad !== 'aportada' && modalidad !== 'gratuita') {
+    return { ok: false, error: 'modalidad_invalida' };
+  }
+
+  // En 'aportada', el importe ES el dinero entregado y el valor económico.
+  // En 'gratuita', el importe_aportado es 0 y el valor económico (que ocupa
+  // capacidad del valor_total) es valorReferencia.
+  let valorEconomico;
+  let dineroEntregado;
+  if (modalidad === 'aportada') {
+    valorEconomico = typeof importe === 'number' && Number.isFinite(importe) ? importe : NaN;
+    dineroEntregado = typeof importeAportado === 'number' ? importeAportado : valorEconomico;
+  } else {
+    valorEconomico = typeof valorReferencia === 'number' && Number.isFinite(valorReferencia) ? valorReferencia : NaN;
+    dineroEntregado = 0;
+  }
+  if (typeof valorEconomico !== 'number' || valorEconomico <= 0 || !Number.isFinite(valorEconomico)) {
+    return { ok: false, error: modalidad === 'aportada' ? 'importe_invalido' : 'valor_referencia_invalido' };
   }
 
   const decimo = db.prepare('SELECT * FROM decimos WHERE id = ?').get(decimoId);
@@ -98,15 +117,18 @@ function addParticipacion(db, { decimoId, importe, nombre = null }) {
     prevHash = ultimo ? ultimo.hash_actual : GENESIS;
   }
 
+  // El control del 100% usa el valor ECONÓMICO de cada participación
+  // (aportada => importe; gratuita => valor_referencia), porque un regalo
+  // también ocupa cuota del décimo.
   const emitido = db
     .prepare('SELECT COALESCE(SUM(importe),0) AS total FROM participaciones WHERE decimo_id = ?')
     .get(decimoId).total;
 
-  if (emitido + importe > decimo.valor_total) {
+  if (emitido + valorEconomico > decimo.valor_total) {
     return {
       ok: false,
       error: 'supera_valor_total',
-      message: `No se puede emitir: ${emitido.toFixed(2)}€ ya emitidos + ${importe.toFixed(2)}€ excede el valor_total de ${decimo.valor_total.toFixed(2)}€`,
+      message: `No se puede emitir: ${emitido.toFixed(2)}€ ya emitidos + ${valorEconomico.toFixed(2)}€ excede el valor_total de ${decimo.valor_total.toFixed(2)}€`,
       emitido,
       valor_total: decimo.valor_total,
     };
@@ -115,13 +137,28 @@ function addParticipacion(db, { decimoId, importe, nombre = null }) {
   const id = crypto.randomUUID();
   const access_token = crypto.randomBytes(32).toString('hex'); // 256 bits, secreto del partícipe
   const created_at = new Date().toISOString();
-  const hash_actual = hashBlock(prevHash, decimoId, importe, created_at);
+  const hash_actual = hashBlock(prevHash, decimoId, valorEconomico, created_at);
 
   db.prepare(
-    'INSERT INTO participaciones (id, decimo_id, importe, nombre_participante, hash_anterior, hash_actual, created_at, access_token) VALUES (?,?,?,?,?,?,?,?)'
-  ).run(id, decimoId, importe, nombre, prevHash, hash_actual, created_at, access_token);
+    'INSERT INTO participaciones (id, decimo_id, importe, nombre_participante, hash_anterior, hash_actual, created_at, access_token, modalidad, importe_aportado, valor_referencia) VALUES (?,?,?,?,?,?,?,?,?,?,?)'
+  ).run(id, decimoId, valorEconomico, nombre, prevHash, hash_actual, created_at, access_token, modalidad, dineroEntregado, modalidad === 'gratuita' ? valorEconomico : null);
 
-  return { ok: true, participacion: { id, decimo_id: decimoId, importe, hash_anterior: prevHash, hash_actual, created_at, access_token } };
+  return {
+    ok: true,
+    participacion: {
+      id,
+      decimo_id: decimoId,
+      importe: valorEconomico,
+      nombre,
+      modalidad,
+      importe_aportado: dineroEntregado,
+      valor_referencia: modalidad === 'gratuita' ? valorEconomico : null,
+      hash_anterior: prevHash,
+      hash_actual,
+      created_at,
+      access_token,
+    },
+  };
 }
 
 /**

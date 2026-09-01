@@ -354,7 +354,7 @@ router.get('/decimo/:id', (req, res) => {
   if (!d) return res.status(404).send('Décimo no encontrado');
   const chain = computeChain(db, d.id);
   const agg = resumen(d.id);
-  const parts = db.prepare('SELECT id, importe, nombre_participante, access_token FROM participaciones WHERE decimo_id = ? ORDER BY created_at ASC').all(d.id);
+  const parts = db.prepare('SELECT id, importe, nombre_participante, access_token, modalidad, importe_aportado, valor_referencia, aceptado_at FROM participaciones WHERE decimo_id = ? ORDER BY created_at ASC').all(d.id);
   const enlaceParticipar = `${base(req)}/participa/${d.id}`;
   const enlaceGestion = `${base(req)}/decimo/${d.id}`;
   const enlaceVerificar = `${base(req)}/verificar/${d.id}`;
@@ -412,12 +412,15 @@ router.get('/decimo/:id', (req, res) => {
 
 <div class="card">
 <h2>Participaciones de TU reparto (${parts.length})</h2>
-${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>% reparto</th><th>Comprobante</th><th>Compartir</th><th></th></tr>
+${parts.length ? `<table><tr><th>Partícipe</th><th>Modalidad</th><th>Cuota</th><th>% reparto</th><th>Comprobante</th><th>Compartir</th><th></th></tr>
 ${parts.map((p, i) => {
   const esUltima = i === parts.length - 1;
   const linkPart = `${base(req)}/mi-participacion/${p.access_token}`;
   const pctP = d.valor_total > 0 ? ((p.importe / d.valor_total) * 100).toFixed(2) : '0';
-  return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}</td><td>${p.importe.toFixed(2)}€</td><td>${pctP}%</td>
+  const modLabel = p.modalidad === 'gratuita' ? 'regalo' : 'aportada';
+  const aceptada = p.aceptado_at ? '✓ aceptó' : '⏳ sin aceptar';
+  const detalle = p.modalidad === 'gratuita' ? `0€ (ref ${p.importe.toFixed(2)}€)` : `${(p.importe_aportado != null ? p.importe_aportado : p.importe).toFixed(2)}€`;
+  return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}<br><span class="muted" style="font-size:11px">${aceptada}</span></td><td>${modLabel}</td><td>${detalle}</td><td>${pctP}%</td>
 <td class="mono"><a href="${linkPart}" target="_blank">abrir</a></td>
 <td><button class="share-btn" onclick="compartir('${linkPart}','${esc(p.nombre_participante) || 'tu'}','${d.id}')">📤</button></td>
 <td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
@@ -428,12 +431,18 @@ ${parts.map((p, i) => {
 ${cerrado ? '' : `<div class="card">
 <h2>➕ Añadir una participación</h2>
 <form class="join" data-decimo="${d.id}">
+  <div class="join-row" style="margin-bottom:8px">
+    <label style="font-size:13px;color:var(--mut)">Modalidad:</label>
+    <label style="font-size:13px"><input type="radio" name="modalidad" value="aportada" checked onchange="toggleModalidad()"> Aportada (pagó)</label>
+    <label style="font-size:13px"><input type="radio" name="modalidad" value="gratuita" onchange="toggleModalidad()"> Gratuita (regalo)</label>
+  </div>
   <div class="join-row">
     <input name="nombre" placeholder="Nombre del partícipe" required>
     <input name="importe" type="number" step="0.01" min="0.01" max="${saldo > 0 ? saldo : 0}" placeholder="Importe €" required>
     <button>Añadir</button>
   </div>
   <p class="msg"></p>
+  <p class="muted" id="mod-hint" style="font-size:12px;margin:4px 0 0">Modalidad <b>aportada</b>: el partícipe entrega dinero y recibe una cuota.</p>
 </form>
 </div>`}
 <div class="card" style="text-align:center">
@@ -447,14 +456,28 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   var form=ev.target, did=form.dataset.decimo;
   var nombre=form.querySelector('[name=nombre]').value;
   var importe=parseFloat(form.querySelector('[name=importe]').value);
+  var modalidad=form.querySelector('input[name=modalidad]:checked').value;
   var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando...';
-  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({importe,nombre})});
+  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({importe,nombre,modalidad})});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
   msg.className='msg ok';
   msg.innerHTML='✓ Comprobante: <a href="/mi-participacion/'+data.access_token+'">ver / enviar</a>';
   setTimeout(function(){location.reload();},1800);
 });
+function toggleModalidad(){
+  var f=document.querySelector('.join'); if(!f) return;
+  var m=f.querySelector('input[name=modalidad]:checked').value;
+  var hint=document.getElementById('mod-hint');
+  var importe=f.querySelector('[name=importe]');
+  if(m==='gratuita'){
+    importe.placeholder='Valor de la cuota regalada €';
+    if(hint) hint.innerHTML='Modalidad <b>gratuita</b>: asignas una cuota del décimo sin que el partícipe pague nada. Se registra "importe aportado 0 €" y un valor de referencia.';
+  } else {
+    importe.placeholder='Importe €';
+    if(hint) hint.innerHTML='Modalidad <b>aportada</b>: el partícipe entrega dinero y recibe una cuota.';
+  }
+}
 function compartir(link, nombre, did){
   var texto = '🎟️ Tu participación está registrada. Abre tu comprobante aquí: ' + link;
   var op = confirm('Compartir con ' + nombre + ':\\n\\n[OK] Copiar enlace\\n[Cancelar] Abrir WhatsApp con el mensaje listo');
@@ -603,6 +626,9 @@ router.get('/mi-participacion/:token', (req, res) => {
   const chain = computeChain(db, d.id);
   const linkVerif = `${base(req)}/verificar/${d.id}`;
   const pct = d.valor_total > 0 ? ((p.importe / d.valor_total) * 100).toFixed(2) : '0';
+  const esGratuita = p.modalidad === 'gratuita';
+  const importeMostrado = esGratuita ? (p.importe_aportado != null ? p.importe_aportado : 0) : (p.importe_aportado != null ? p.importe_aportado : p.importe);
+  const yaAceptada = Boolean(p.aceptado_at);
 
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Tu comprobante · ${d.numero}</title>${css}</head><body>
@@ -614,10 +640,19 @@ router.get('/mi-participacion/:token', (req, res) => {
   <p class="muted">Comprobante personal. Solo quien tenga este enlace lo ve.</p>
   <div class="kpis">
     <div class="kpi"><b>${esc(d.numero)}</b><span>serie ${esc(d.serie)}</span></div>
-    <div class="kpi"><b>${p.importe.toFixed(2)}€</b><span>tu aportación</span></div>
+    <div class="kpi"><b>${esGratuita ? '0,00' : importeMostrado.toFixed(2)}€</b><span>tu aportación</span></div>
     <div class="kpi"><b>${pct}%</b><span>de participación</span></div>
     <div class="kpi"><b>${esc(p.nombre_participante) || 'Anónimo'}</b><span>partícipe</span></div>
   </div>
+  ${esGratuita ? `<p class="muted" style="font-size:13px">Modalidad: <b>asignación gratuita</b> — te han regalado una cuota (valor de referencia ${p.importe.toFixed(2)}€). No has aportado dinero.</p>` : ''}
+  ${yaAceptada
+    ? `<p class="muted" style="font-size:13px;color:var(--ok)">✓ Aceptación registrada: ${esc(p.aceptado_at)} (enlace privado + confirmación).</p>`
+    : `<div class="card" style="border-color:var(--accent2);margin-top:10px">
+        <p style="margin:0 0 8px;font-size:14px">Antes de descargar, confirma que has leído y aceptas esta participación.</p>
+        <label style="font-size:13px;display:block;margin-bottom:10px"><input type="checkbox" id="chk-acepto"> He leído los datos de esta participación y la acepto.</label>
+        <button class="btn" id="btn-aceptar" disabled>✓ Confirmar y aceptar</button>
+        <p class="msg" id="msg-acepta" style="margin-top:8px"></p>
+      </div>`}
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
     <a href="/mi-participacion/${token}/imagen" class="btn">🖼 Descargar imagen</a>
     <a href="/mi-participacion/${token}/pdf" class="btn">📄 Descargar PDF</a>
@@ -637,6 +672,20 @@ router.get('/mi-participacion/:token', (req, res) => {
   var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
   apply(saved==='light'?'light':'dark');
   btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
+})();
+(function(){
+  var chk=document.getElementById('chk-acepto'), b=document.getElementById('btn-aceptar');
+  if(!chk||!b) return;
+  chk.addEventListener('change', function(){ b.disabled=!chk.checked; });
+  b.addEventListener('click', async function(){
+    var msg=document.getElementById('msg-acepta');
+    msg.className='msg'; msg.textContent='Registrando aceptación...';
+    var r=await fetch('/mi-participacion/${token}/aceptar',{method:'POST'});
+    var data=await r.json();
+    if(!r.ok){ msg.className='msg err'; msg.textContent=data.message||data.error; return; }
+    msg.className='msg ok'; msg.textContent='✓ Aceptación registrada. El PDF se ha actualizado.';
+    setTimeout(function(){ location.reload(); }, 1500);
+  });
 })();
 </script>
 <div style="text-align:center;margin-top:20px;padding:10px 0">

@@ -192,15 +192,16 @@ footer a{color:var(--accent);text-decoration:none}
   <div class="form-shell">
     <h3>🎟️ Registra un sorteo o reparto compartido</h3>
     <p class="hint">Añade los datos del boleto, rifa o reparto que ya existe. Después invita a las personas participantes.</p>
-    <form method="POST" action="/decimos">
+    <form id="form-crear" method="POST" action="/decimos">
       <div class="grid2">
-        <input name="numero" placeholder="Número (si lo hay, ej. 85432)">
-        <input name="serie" placeholder="Serie (si lo hay)">
+        <input name="numero" id="inp-numero" placeholder="Número (si lo hay, ej. 85432)">
+        <input name="serie" id="inp-serie" placeholder="Serie (si lo hay)">
         <input name="sorteo" placeholder="Nombre del sorteo o reparto" value="Sorteo compartido">
-        <input name="valor_total" type="number" step="0.01" min="1" value="20" placeholder="Importe de referencia €" required>
+        <input name="valor_total" id="inp-valor" type="number" step="0.01" min="1" value="20" placeholder="Importe de referencia €" required>
       </div>
-      <button class="btn-big">🎟️ Crear el registro de participaciones</button>
+      <button class="btn-big" type="submit">🎟️ Crear el registro de participaciones</button>
     </form>
+    <p id="form-aviso" style="display:none;margin-top:12px;padding:10px 14px;border-radius:10px;font-size:14px"></p>
     <p class="mini">Al crear el registro recibirás un enlace privado de gestión. Cada partícipe tendrá su propio comprobante y no podrá ver los importes de los demás.</p>
   </div>
 </section>
@@ -298,21 +299,52 @@ footer a{color:var(--accent);text-decoration:none}
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/assets/sw.js'); });
 }
+(function(){
+  var form = document.getElementById('form-crear');
+  if (!form) return;
+  var aviso = document.getElementById('form-aviso');
+  function mostrarAviso(msg, tipo){
+    aviso.style.display = 'block';
+    aviso.textContent = msg;
+    aviso.style.background = tipo === 'err' ? 'rgba(248,113,113,.15)' : 'rgba(52,211,153,.12)';
+    aviso.style.color = tipo === 'err' ? '#f87171' : '#4ade80';
+    aviso.style.border = '1px solid ' + (tipo === 'err' ? 'rgba(248,113,113,.4)' : 'rgba(52,211,153,.4)');
+  }
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var numero = document.getElementById('inp-numero').value.trim();
+    var serie = document.getElementById('inp-serie').value.trim();
+    var valor = parseFloat(document.getElementById('inp-valor').value);
+    // Aviso suave si no hay número ni serie: se puede continuar, solo informa.
+    if (!numero && !serie) {
+      if (!confirm('No has indicado número ni serie del sorteo. ¿El reparto es sin número conocido?\n\n[OK] Continuar sin número\n[Cancelar] Volver a revisar')) return;
+    } else if (!numero) {
+      if (!confirm('No has indicado el número. ¿Continuar sin número?\n\n[OK] Continuar\n[Cancelar] Revisar')) return;
+    }
+    if (!isFinite(valor) || valor <= 0) {
+      mostrarAviso('⚠️ Introduce un importe total válido (mayor que 0).', 'err');
+      return;
+    }
+    // Enviar el form de verdad (submit nativo) para crear el reparto.
+    form.submit();
+  });
+})();
 </script>
 </body></html>`);
 });
 
-// POST crear décimo
+// POST crear reparto (número y serie opcionales — son "si lo hay")
 router.post('/decimos', (req, res) => {
   const numero = String(req.body.numero || '').trim();
   const serie = String(req.body.serie || '').trim();
   const sorteo = String(req.body.sorteo || 'Sorteo compartido').trim();
   const valor_total = parseFloat(req.body.valor_total);
-  if (!numero || !serie || !isFinite(valor_total) || valor_total <= 0)
-    return res.status(400).send('Datos incompletos');
+  // Solo el importe total es imprescindible. Número/serie son opcionales.
+  if (!isFinite(valor_total) || valor_total <= 0)
+    return res.status(400).send('Error: falta el importe total del reparto');
   const id = crypto.randomUUID();
-  db.prepare('INSERT INTO decimos (id, organizador_id, numero, serie, sorteo, valor_total, created_at) VALUES (?,?,?,?,?,?,?)')
-    .run(id, null, numero, serie, sorteo, valor_total, new Date().toISOString());
+  db.prepare('INSERT INTO decimos (id, organizador_id, numero, serie, sorteo, valor_total, created_at, estado) VALUES (?,?,?,?,?,?,?,?)')
+    .run(id, null, numero || '—', serie || '—', sorteo, valor_total, new Date().toISOString(), 'abierto');
   res.redirect(303, `/decimo/${id}`);
 });
 

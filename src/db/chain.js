@@ -117,4 +117,33 @@ function addParticipacion(db, { decimoId, importe, nombre = null }) {
   return { ok: true, participacion: { id, decimo_id: decimoId, importe, hash_anterior: prevHash, hash_actual, created_at, access_token } };
 }
 
-module.exports = { hashBlock, GENESIS, computeChain, validateChain, addParticipacion };
+/**
+ * Elimina la ÚLTIMA participación de un décimo (para corregir errores:
+ * doble clic, asignación equivocada).
+ *
+ * SOLO se puede eliminar la última de la cadena: eliminar una intermedia
+ * rompería la cadena (las siguientes apuntan a su hash). Al quitar la última,
+ * las anteriores siguen encadenando correctamente.
+ *
+ * Devuelve { ok, error?, participacion? } con la participación eliminada.
+ */
+function eliminarUltimaParticipacion(db, decimoId) {
+  // Obtener la última participación SIGUIENDO la cadena (no por fecha):
+  // el último bloque es el que NO es hash_anterior de ningún otro.
+  const all = db.prepare('SELECT * FROM participaciones WHERE decimo_id = ?').all(decimoId);
+  if (all.length === 0) return { ok: false, error: 'sin_participaciones' };
+
+  const anteriorHashes = new Set(all.map((r) => r.hash_anterior));
+  const ultima = all.find((r) => !anteriorHashes.has(r.hash_actual));
+  if (!ultima) return { ok: false, error: 'cadena_rota_no_eliminable' };
+
+  const emitido = all.reduce((s, r) => s + r.importe, 0);
+  db.prepare('DELETE FROM participaciones WHERE id = ?').run(ultima.id);
+  return {
+    ok: true,
+    participacion: { id: ultima.id, importe: ultima.importe, nombre: ultima.nombre_participante },
+    emitido_anterior: emitido,
+  };
+}
+
+module.exports = { hashBlock, GENESIS, computeChain, validateChain, addParticipacion, eliminarUltimaParticipacion };

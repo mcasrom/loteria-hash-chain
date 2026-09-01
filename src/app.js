@@ -2,7 +2,7 @@
 // App Express — fase 2: imagen + PDF + verificación pública + OG dinámico.
 const express = require('express');
 const { openDb } = require('./db/schema');
-const { addParticipacion, computeChain } = require('./db/chain');
+const { addParticipacion, computeChain, eliminarUltimaParticipacion } = require('./db/chain');
 const crypto = require('crypto');
 
 const app = express();
@@ -54,6 +54,22 @@ app.post('/decimos/:id/participaciones', async (req, res) => {
     imagen: imagen || null,
     pdf: pdf || null,
   });
+});
+
+// Eliminar la ÚLTIMA participación de un sorteo (corregir error del organizador).
+// Solo se puede eliminar la última de la cadena (no rompe los hashes).
+app.delete('/decimos/:id/participaciones/ultima', (req, res) => {
+  const r = eliminarUltimaParticipacion(db, req.params.id);
+  if (!r.ok) return res.status(400).json({ error: r.error, message: r.error });
+  // borrar imagen y PDF generados de esa participación
+  const fs = require('fs');
+  const path = require('path');
+  const base = path.join(__dirname, '..', 'output-samples');
+  for (const ext of ['png', 'pdf']) {
+    const f = path.join(base, ext === 'png' ? 'imagenes' : 'pdfs', `${r.participacion.id}.${ext}`);
+    try { fs.unlinkSync(f); } catch (e) { /* no existe */ }
+  }
+  res.json({ ok: true, eliminada: r.participacion });
 });
 
 // Verificar integridad

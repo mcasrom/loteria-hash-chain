@@ -58,6 +58,8 @@ h1{font-size:26px;margin:0 0 4px}.muted{color:var(--mut);font-size:13px;margin:2
 table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px}
 td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
 th{color:var(--mut);font-weight:600;font-size:12px}
+.del-btn{background:transparent;border:1px solid var(--line);color:#f87171;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px}
+.del-btn:hover{background:rgba(248,113,113,.15);border-color:#f87171}
 .join{background:#0f172a;border:1px dashed var(--line);border-radius:12px;padding:16px;margin-top:12px}
 .join-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .join input{flex:1;min-width:120px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:14px}
@@ -338,9 +340,14 @@ router.get('/decimo/:id', (req, res) => {
 </div>
 <div class="card">
 <h2>Participaciones de TU décimo (${parts.length})</h2>
-${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>Comprobante</th></tr>
-${parts.map((p) => `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}</td><td>${p.importe.toFixed(2)}€</td>
-<td class="mono"><a href="/mi-participacion/${p.access_token}">abrir</a></td></tr>`).join('')}</table>`
+${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>Comprobante</th><th></th></tr>
+${parts.map((p, i) => {
+  const esUltima = i === parts.length - 1;
+  return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}</td><td>${p.importe.toFixed(2)}€</td>
+<td class="mono"><a href="/mi-participacion/${p.access_token}">abrir</a></td>
+<td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
+}).join('')}</table>
+<p class="muted" style="font-size:12px">🗑 Solo se puede eliminar la <b>última</b> participación (para corregir un doble clic o un error). Las anteriores no se tocan para no romper la cadena de integridad.</p>`
   : '<p class="muted">Aún no hay participaciones.</p>'}
 </div>
 <div class="card">
@@ -370,6 +377,14 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   msg.innerHTML='✓ Comprobante: <a href="/mi-participacion/'+data.access_token+'">ver / enviar</a>';
   setTimeout(function(){location.reload();},1800);
 });
+async function eliminarUltima(did){
+  if(!confirm('¿Eliminar la última participación? Esta acción no se puede deshacer. La cadena de integridad se mantiene (solo se quita la última).')) return;
+  var r=await fetch('/decimos/'+did+'/participaciones/ultima',{method:'DELETE'});
+  var data=await r.json();
+  if(!r.ok){alert(data.message||data.error);return;}
+  alert('Participación eliminada: '+(data.eliminada.nombre||'Anónimo')+' ('+data.eliminada.importe.toFixed(2)+'€)');
+  location.reload();
+}
 </script>
 </body></html>`);
 });

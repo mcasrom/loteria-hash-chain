@@ -102,3 +102,28 @@ test('simular un access_token inventado: no existe en BD (equivale a 404)', () =
   const p = db.prepare('SELECT * FROM participaciones WHERE access_token = ?').get(falso);
   expect(p).toBeUndefined();
 });
+
+test('eliminar la última participación NO rompe la cadena', () => {
+  addParticipacion(db, { decimoId, importe: 10, nombre: 'Ana' });
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Luis' });
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Marta' });
+  expect(validateChain(db, decimoId)).toBe(true);
+  // eliminar la última (Marta)
+  const r = require('../src/db/chain').eliminarUltimaParticipacion(db, decimoId);
+  expect(r.ok).toBe(true);
+  expect(r.participacion.nombre).toBe('Marta');
+  // la cadena sigue siendo válida (las 2 restantes encadenan bien)
+  expect(validateChain(db, decimoId)).toBe(true);
+  const agg = db.prepare('SELECT COUNT(*) c FROM participaciones WHERE decimo_id=?').get(decimoId).c;
+  expect(agg).toBe(2);
+});
+
+test('no se puede eliminar una participación intermedia (la cadena no es la última)', () => {
+  addParticipacion(db, { decimoId, importe: 10, nombre: 'Ana' });
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Luis' });
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Marta' });
+  // Manipular: intentar borrar Ana directamente en BD y comprobar que la cadena se rompe
+  // (lo que confirma por qué solo permitimos borrar la última)
+  db.prepare("DELETE FROM participaciones WHERE nombre_participante='Ana'").run();
+  expect(validateChain(db, decimoId)).toBe(false);
+});

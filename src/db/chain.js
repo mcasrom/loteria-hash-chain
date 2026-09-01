@@ -84,6 +84,9 @@ function addParticipacion(db, { decimoId, importe, nombre = null }) {
 
   const decimo = db.prepare('SELECT * FROM decimos WHERE id = ?').get(decimoId);
   if (!decimo) return { ok: false, error: 'decimo_no_existe' };
+  if (decimo.estado === 'cerrado') {
+    return { ok: false, error: 'reparto_cerrado', message: 'Este reparto está cerrado. No se pueden añadir más participaciones.' };
+  }
 
   // hash del último bloque de la cadena: el que NO es hash_anterior de ningún otro.
   // (No usar ORDER BY created_at: con timestamps al mismo ms el orden es no-determinista.)

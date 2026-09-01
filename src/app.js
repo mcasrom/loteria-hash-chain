@@ -77,6 +77,20 @@ app.delete('/decimos/:id/participaciones/ultima', (req, res) => {
   res.json({ ok: true, eliminada: r.participacion });
 });
 
+// Abrir / cerrar un reparto (estado operativo)
+app.post('/decimos/:id/cerrar', (req, res) => {
+  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
+  if (!d) return res.status(404).json({ error: 'reparto_no_existe' });
+  db.prepare('UPDATE decimos SET estado = ? WHERE id = ?').run('cerrado', req.params.id);
+  res.json({ ok: true, estado: 'cerrado' });
+});
+app.post('/decimos/:id/abrir', (req, res) => {
+  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
+  if (!d) return res.status(404).json({ error: 'reparto_no_existe' });
+  db.prepare('UPDATE decimos SET estado = ? WHERE id = ?').run('abierto', req.params.id);
+  res.json({ ok: true, estado: 'abierto' });
+});
+
 // Verificar integridad
 app.get('/decimos/:id/verificar-api', (req, res) => {
   const decimo = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);

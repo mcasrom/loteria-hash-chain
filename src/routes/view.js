@@ -324,30 +324,62 @@ router.get('/decimo/:id', (req, res) => {
   const agg = resumen(d.id);
   const parts = db.prepare('SELECT id, importe, nombre_participante, access_token FROM participaciones WHERE decimo_id = ? ORDER BY created_at ASC').all(d.id);
   const enlaceParticipar = `${base(req)}/participa/${d.id}`;
+  const enlaceGestion = `${base(req)}/decimo/${d.id}`;
+  const enlaceVerificar = `${base(req)}/verificar/${d.id}`;
   const pct = d.valor_total > 0 ? Math.min(100, (agg.s / d.valor_total) * 100) : 0;
   const saldo = d.valor_total - agg.s;
+  const pctRegistrado = d.valor_total > 0 ? ((agg.s / d.valor_total) * 100).toFixed(1) : '0';
+  const cerrado = d.estado === 'cerrado';
 
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Décimo ${d.numero} · gestión</title>${css}</head><body>
 <main>
-<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a> · <a href="/">← Registrar otro sorteo</a></p>
+<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a></p>
+
+<div class="card" style="border-color:var(--accent2)">
+  <h2 style="margin-top:0">🔐 Acceso privado del creador</h2>
+  <p class="muted">Guarda este enlace: es tu acceso permanente para consultar y administrar este reparto. Por seguridad, no se vuelve a mostrar automáticamente.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0">
+    <input readonly value="${enlaceGestion}" style="flex:1;min-width:200px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:13px">
+    <button class="btn" onclick="copyTexto('${enlaceGestion}')">📋 Copiar enlace</button>
+    <button class="btn" onclick="window.open('mailto:?subject=Acceso a tu reparto&amp;body=Tu enlace de gestión: ${encodeURIComponent(enlaceGestion)}','_self')">✉️ Enviar a mi correo</button>
+    <button class="btn" onclick="descargarRecuperacion('${d.id}','${enlaceGestion}')">⬇️ Código de recuperación</button>
+  </div>
+  <p class="muted" style="margin:0">Desde aquí puedes ver el estado, completar participaciones, compartir enlaces y cerrar el reparto.</p>
+</div>
+
 <div class="card">
-  <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1 style="margin:0">Registro ${esc(d.numero)} · ${esc(d.serie)}</h1>
-    <p class="muted">${esc(d.sorteo)} · Panel <b>solo tuyo</b>: ves tu número y a quien participa.</p></div>
-    <span class="badge ${chain.ok ? 'ok' : 'bad'}">${chain.ok ? 'ÍNTEGRA ✓' : 'ALTERADA ✗'}</span>
+  <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div><h1 style="margin:0">Reparto ${esc(d.numero)} · ${esc(d.serie)}</h1>
+    <p class="muted">${esc(d.sorteo)} · Panel <b>solo tuyo</b></p></div>
+    <span class="badge ${cerrado ? 'bad' : 'ok'}">${cerrado ? '🔒 CERRADO' : '● ABIERTO'}</span>
+    <span class="badge ${chain.ok ? 'ok' : 'bad'}">Integridad: ${chain.ok ? 'VERIFICADA ✓' : 'ALTERADA ✗'}</span>
   </div>
   <div class="kpis">
-    <div class="kpi"><b>${d.valor_total.toFixed(2)}€</b><span>total</span></div>
-    <div class="kpi"><b>${agg.s.toFixed(2)}€</b><span>emitido</span></div>
-    <div class="kpi"><b>${saldo.toFixed(2)}€</b><span>saldo libre</span></div>
-    <div class="kpi"><b>${agg.c}</b><span>partícipes</span></div>
+    <div class="kpi"><b>${d.valor_total.toFixed(2)}€</b><span>importe total</span></div>
+    <div class="kpi"><b>${agg.s.toFixed(2)}€</b><span>registrado</span></div>
+    <div class="kpi"><b>${pctRegistrado}%</b><span>asignado</span></div>
+    <div class="kpi"><b>${agg.c}</b><span>participaciones</span></div>
+    <div class="kpi"><b>${saldo.toFixed(2)}€</b><span>pendiente</span></div>
   </div>
   <div class="bar"><div style="width:${pct}%"></div></div>
-  <p class="muted">🔗 Enlace para que aporten su parte: <a href="${enlaceParticipar}">${enlaceParticipar}</a></p>
+  <p class="muted">Participaciones: <b>${agg.c}</b> registradas · Importe registrado: <b>${agg.s.toFixed(2)}€</b> · Pendiente: <b>${saldo.toFixed(2)}€ / ${(100-pct).toFixed(0)}%</b></p>
+  ${cerrado ? '<p class="muted" style="color:var(--ok)">Este reparto está cerrado. No se pueden añadir más participaciones.</p>' : ''}
 </div>
+
 <div class="card">
-<h2>Participaciones de TU décimo (${parts.length})</h2>
+<h2>🔗 Enlaces del reparto</h2>
+<p class="muted" style="margin:0 0 10px">Tres enlaces diferenciados según a quién van destinados:</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+  <button class="btn" onclick="copyTexto('${enlaceParticipar}')">📤 Enlace de participación</button>
+  <button class="btn" onclick="window.open('https://wa.me/?text='+encodeURIComponent('Regístrate en este reparto: ${enlaceParticipar}'),'_blank')">📲 Compartir participación (WhatsApp)</button>
+  <a class="btn-line" href="${enlaceVerificar}" target="_blank">🔍 Verificación pública</a>
+</div>
+<p class="muted" style="font-size:12px">· <b>Enlace de participación</b>: lo comparten con las personas invitadas.<br>· <b>Verificación pública</b>: para QR/PDF/terceros, sin datos privados.</p>
+</div>
+
+<div class="card">
+<h2>Participaciones de TU reparto (${parts.length})</h2>
 ${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>% reparto</th><th>Comprobante</th><th>Compartir</th><th></th></tr>
 ${parts.map((p, i) => {
   const esUltima = i === parts.length - 1;
@@ -358,10 +390,10 @@ ${parts.map((p, i) => {
 <td><button class="share-btn" onclick="compartir('${linkPart}','${esc(p.nombre_participante) || 'tu'}','${d.id}')">📤</button></td>
 <td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
 }).join('')}</table>
-<p class="muted" style="font-size:12px">📤 Compartir copia el enlace del comprobante o lo abre en WhatsApp con el texto listo. 🗑 Solo se puede eliminar la <b>última</b> participación (para corregir un doble clic o un error). Las anteriores no se tocan para no romper la cadena de integridad.</p>`
+<p class="muted" style="font-size:12px">📤 Compartir copia el enlace del comprobante o lo abre en WhatsApp. 🗑 Solo se puede eliminar la <b>última</b> participación (corrige errores).</p>`
   : '<p class="muted">Aún no hay participaciones.</p>'}
 </div>
-<div class="card">
+${cerrado ? '' : `<div class="card">
 <h2>➕ Añadir una participación</h2>
 <form class="join" data-decimo="${d.id}">
   <div class="join-row">
@@ -371,8 +403,11 @@ ${parts.map((p, i) => {
   </div>
   <p class="msg"></p>
 </form>
+</div>`}
+<div class="card" style="text-align:center">
+  <button class="btn" onclick="descargarResumen('${d.id}')">📄 Descargar resumen</button>
+  ${cerrado ? '' : `<button class="btn" style="background:#dc2626" onclick="cerrarReparto('${d.id}')">🔒 Cerrar y sellar el reparto</button>`}
 </div>
-<p class="muted"><a href="/verificar/${d.id}">🔍 Verificación pública (anónima)</a></p>
 </main>
 <script>
 document.querySelector('.join') && document.querySelector('.join').addEventListener('submit', async function(ev){
@@ -410,6 +445,30 @@ async function eliminarUltima(did){
   var data=await r.json();
   if(!r.ok){alert(data.message||data.error);return;}
   alert('Participación eliminada: '+(data.eliminada.nombre||'Anónimo')+' ('+data.eliminada.importe.toFixed(2)+'€)');
+  location.reload();
+}
+function copyTexto(txt){
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject())
+    .then(function(){ alert('Enlace copiado al portapapeles'); })
+    .catch(function(){ prompt('Copia este enlace:', txt); });
+}
+function descargarRecuperacion(id, enlace){
+  var txt = 'REGISTRO DE PARTICIPACIONES - CÓDIGO DE RECUPERACIÓN\n\nID del reparto: ' + id + '\nEnlace de gestión: ' + enlace + '\n\nGuárdalo en lugar seguro. Este enlace es tu acceso privado para gestionar el reparto.\n';
+  var blob = new Blob([txt], {type:'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'recuperacion-reparto-' + id.slice(0,8) + '.txt';
+  a.click();
+  alert('Código de recuperación descargado. Guárdalo en lugar seguro.');
+}
+function descargarResumen(did){
+  window.open('/decimo/'+did+'/resumen.txt','_blank');
+}
+async function cerrarReparto(did){
+  if(!confirm('¿Cerrar y sellar el reparto? No se podrán añadir más participaciones. Esta acción se puede deshacer abriéndolo de nuevo.')) return;
+  var r=await fetch('/decimos/'+did+'/cerrar',{method:'POST'});
+  var data=await r.json();
+  if(!r.ok){alert(data.error||'Error');return;}
   location.reload();
 }
 (function(){
@@ -550,6 +609,40 @@ router.get('/mi-participacion/:token', (req, res) => {
   <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>
 </div>
 </body></html>`);
+});
+
+// Resumen descargable del reparto (para el creador)
+router.get('/decimo/:id/resumen.txt', (req, res) => {
+  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
+  if (!d) return res.status(404).end();
+  const chain = computeChain(db, d.id);
+  const agg = resumen(d.id);
+  const parts = db.prepare('SELECT nombre_participante, importe FROM participaciones WHERE decimo_id = ? ORDER BY created_at ASC').all(d.id);
+  const pct = d.valor_total > 0 ? ((agg.s / d.valor_total) * 100).toFixed(1) : '0';
+  let txt = `REPARTO DE PARTICIPACIONES\n`;
+  txt += `========================\n\n`;
+  txt += `Número: ${d.numero} · Serie: ${d.serie}\n`;
+  txt += `Sorteo: ${d.sorteo}\n`;
+  txt += `Estado: ${d.estado}\n`;
+  txt += `Integridad: ${chain.ok ? 'VERIFICADA' : 'ALTERADA'}\n\n`;
+  txt += `Importe total: ${d.valor_total.toFixed(2)} €\n`;
+  txt += `Registrado: ${agg.s.toFixed(2)} € (${pct}%)\n`;
+  txt += `Pendiente: ${(d.valor_total - agg.s).toFixed(2)} €\n`;
+  txt += `Participaciones: ${agg.c}\n\n`;
+  txt += `PARTICIPACIONES\n`;
+  txt += `--------------\n`;
+  if (parts.length) {
+    for (const p of parts) {
+      const pp = d.valor_total > 0 ? ((p.importe / d.valor_total) * 100).toFixed(2) : '0';
+      txt += `${p.nombre_participante || 'Anónimo'}: ${p.importe.toFixed(2)} € (${pp}%)\n`;
+    }
+  } else {
+    txt += `(sin participaciones registradas)\n`;
+  }
+  txt += `\nVerificación pública: /verificar/${d.id}\n`;
+  res.set('Content-Type', 'text/plain; charset=utf-8');
+  res.set('Content-Disposition', `attachment; filename="resumen-reparto-${d.numero}.txt"`);
+  res.send(txt);
 });
 
 // Descargas del comprobante — SOLO via access_token (misma ruta, con rate-limit)

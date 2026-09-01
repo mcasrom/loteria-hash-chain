@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS decimos (
   serie TEXT NOT NULL,
   sorteo TEXT NOT NULL,
   valor_total REAL NOT NULL,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  estado TEXT NOT NULL DEFAULT 'abierto'
 );
 
 CREATE TABLE IF NOT EXISTS participaciones (

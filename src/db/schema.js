@@ -14,7 +14,11 @@ CREATE TABLE IF NOT EXISTS decimos (
   sorteo TEXT NOT NULL,
   valor_total REAL NOT NULL,
   created_at TEXT NOT NULL,
-  estado TEXT NOT NULL DEFAULT 'abierto'
+  estado TEXT NOT NULL DEFAULT 'abierto',
+  firmado_org_at TEXT NULL,
+  firmado_org_ip TEXT NULL,
+  firmado_org_ua TEXT NULL,
+  firmado_org_hash TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS participaciones (
@@ -68,6 +72,15 @@ function migrar(db) {
     for (const r of rows) {
       db.prepare(`UPDATE decimos SET organizador_token = ? WHERE id = ?`).run(crypto.randomBytes(32).toString('hex'), r.id);
     }
+  }
+  const orgNuevas = {
+    firmado_org_at: 'TEXT NULL',
+    firmado_org_ip: 'TEXT NULL',
+    firmado_org_ua: 'TEXT NULL',
+    firmado_org_hash: 'TEXT NULL',
+  };
+  for (const [name, def] of Object.entries(orgNuevas)) {
+    if (!colsDecimos.includes(name)) db.exec(`ALTER TABLE decimos ADD COLUMN ${name} ${def}`);
   }
 
   const cols = db.prepare(`PRAGMA table_info(participaciones)`).all().map((c) => c.name);

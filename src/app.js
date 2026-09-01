@@ -48,6 +48,7 @@ app.post('/decimos/:id/participaciones', async (req, res) => {
       participacionId: p.id, numero: decimo.numero, serie: decimo.serie,
       sorteo: decimo.sorteo, importe: p.importe, nombre, valorTotal: decimo.valor_total, decimoId: decimo.id,
       modalidad: p.modalidad,
+      firmaOrganizador: decimo.firmado_org_at ? { at: decimo.firmado_org_at, hash: decimo.firmado_org_hash } : null,
     });
   } catch (e) { console.error('pdf err:', e.message); }
   // Responder SOLO el access_token (secreto del partícipe) + rutas de descarga.
@@ -93,6 +94,7 @@ app.post('/mi-participacion/:token/aceptar', (req, res) => {
       sorteo: decimo.sorteo, importe: p.importe, nombre: p.nombre_participante,
       valorTotal: decimo.valor_total, decimoId: decimo.id, modalidad: p.modalidad,
       aceptacion: { at: ahora, hash: docHash },
+      firmaOrganizador: decimo.firmado_org_at ? { at: decimo.firmado_org_at, hash: decimo.firmado_org_hash } : null,
     }).catch((e) => console.error('pdf aceptacion err:', e.message));
   } catch (e) { console.error('pdf aceptacion err:', e.message); }
 
@@ -129,12 +131,22 @@ app.delete('/decimos/:id/participaciones/ultima', (req, res) => {
   res.json({ ok: true, eliminada: r.participacion });
 });
 
-// Abrir / cerrar un reparto (solo el organizador con token)
+// Abrir / cerrar un reparto (solo el organizador con token).
+// Al CERRAR, el organizador firma electrónicamente: registra fecha UTC, IP,
+// user-agent y un hash de su declaración. Es su aceptación de los datos.
 app.post('/decimos/:id/cerrar', (req, res) => {
   const d = validarOrganizador(req, res);
   if (!d) return;
-  db.prepare('UPDATE decimos SET estado = ? WHERE id = ?').run('cerrado', req.params.id);
-  res.json({ ok: true, estado: 'cerrado' });
+  const ip = req.ip || req.connection.remoteAddress || '?';
+  const ua = (req.get('user-agent') || '').slice(0, 200);
+  const ahora = new Date().toISOString();
+  // hash de la declaración del organizador (sobre datos del décimo)
+  const orgHash = crypto.createHash('sha256')
+    .update(`${d.id}|${d.numero}|${d.serie}|${d.valor_total}|${ahora}`)
+    .digest('hex');
+  db.prepare('UPDATE decimos SET estado = ?, firmado_org_at = ?, firmado_org_ip = ?, firmado_org_ua = ?, firmado_org_hash = ? WHERE id = ?')
+    .run('cerrado', ahora, ip, ua, orgHash, req.params.id);
+  res.json({ ok: true, estado: 'cerrado', firmado_org_at: ahora });
 });
 app.post('/decimos/:id/abrir', (req, res) => {
   const d = validarOrganizador(req, res);

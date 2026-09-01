@@ -19,7 +19,7 @@ function selloIntegridad(participacionId, numero, serie, importe, nombre, modali
   return crypto.createHmac('sha256', SELLO_KEY).update(payload, 'utf8').digest('hex');
 }
 
-async function generarPdf({ participacionId, numero, serie, sorteo, importe, nombre, valorTotal, decimoId, depositario = 'Organizador', modalidad = 'aportada', aceptacion = null }) {
+async function generarPdf({ participacionId, numero, serie, sorteo, importe, nombre, valorTotal, decimoId, depositario = 'Organizador', modalidad = 'aportada', aceptacion = null, firmaOrganizador = null }) {
   fs.mkdirSync(OUT_PDFS, { recursive: true });
 
   const esGratuita = modalidad === 'gratuita';
@@ -133,16 +133,23 @@ async function generarPdf({ participacionId, numero, serie, sorteo, importe, nom
   }
   page2.drawText('DECLARACIÓN DEL ORGANIZADOR', { x: 50, y: y2(343), size: 9, font: bold });
   page2.drawText('Declaro que los datos del décimo, la modalidad y la cuota han sido registrados', { x: 50, y: y2(361), size: 9, font });
-  page2.drawText('según mi declaración.   Firma: ____________   Fecha: ______', { x: 50, y: y2(375), size: 9, font });
+  page2.drawText('según mi declaración.', { x: 50, y: y2(375), size: 9, font });
+  if (firmaOrganizador && firmaOrganizador.at) {
+    page2.drawText('   Firma del organizador: [X] Aceptación electrónica registrada al cerrar el reparto', { x: 50, y: y2(393), size: 9, font: bold });
+    page2.drawText(`   Método: token de gestión · Fecha UTC: ${firmaOrganizador.at}`, { x: 50, y: y2(407), size: 8.5, font, color: rgb(0.35, 0.35, 0.45) });
+    page2.drawText(`   Hash del documento sellado: ${firmaOrganizador.hash}`, { x: 50, y: y2(421), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  } else {
+    page2.drawText('   Firma del organizador: ____________   Fecha: ______', { x: 50, y: y2(393), size: 9, font });
+  }
 
-  page2.drawText('10. Advertencias', { x: 50, y: y2(419), size: 11, font: bold });
-  page2.drawText('— Este documento deja constancia de una participación o asignación declarada', { x: 50, y: y2(441), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
-  page2.drawText('entre las partes. No acredita por sí solo la existencia, autenticidad, titularidad', { x: 50, y: y2(455), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
-  page2.drawText('o custodia física del décimo, ni sustituye las obligaciones de identificación,', { x: 50, y: y2(469), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
-  page2.drawText('tributación o pago que puedan resultar aplicables.', { x: 50, y: y2(483), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
-  page2.drawText('— Este documento no sustituye la identificación exigida por la entidad pagadora', { x: 50, y: y2(499), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
-  page2.drawText('ni garantiza el tratamiento fiscal de la operación. En caso de premio, pueden', { x: 50, y: y2(513), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
-  page2.drawText('ser necesarios documentos identificativos adicionales.', { x: 50, y: y2(527), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('10. Advertencias', { x: 50, y: y2(461), size: 11, font: bold });
+  page2.drawText('— Este documento deja constancia de una participación o asignación declarada', { x: 50, y: y2(483), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('entre las partes. No acredita por sí solo la existencia, autenticidad, titularidad', { x: 50, y: y2(497), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('o custodia física del décimo, ni sustituye las obligaciones de identificación,', { x: 50, y: y2(511), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('tributación o pago que puedan resultar aplicables.', { x: 50, y: y2(525), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('— Este documento no sustituye la identificación exigida por la entidad pagadora', { x: 50, y: y2(541), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('ni garantiza el tratamiento fiscal de la operación. En caso de premio, pueden', { x: 50, y: y2(555), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
+  page2.drawText('ser necesarios documentos identificativos adicionales.', { x: 50, y: y2(569), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
 
   const buf = await pdf.save();
   const outFile = path.join(OUT_PDFS, `${participacionId}.pdf`);

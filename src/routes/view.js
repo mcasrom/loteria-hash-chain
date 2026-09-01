@@ -41,8 +41,8 @@ function resumen(decimoId) {
 }
 function base(req) { return `${req.protocol}://${req.get('host')}`; }
 const css = `<style>
-:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--fg:#e2e8f0;--mut:#94a3b8;--accent:#2563eb;--accent2:#3b82f6}
-[data-theme="light"]{--bg:#f6f8fc;--card:#ffffff;--line:#dde4f0;--fg:#16213a;--mut:#5b6b85;--accent:#2563eb;--accent2:#2563eb}
+:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--fg:#e2e8f0;--mut:#94a3b8;--accent:#2563eb;--accent2:#3b82f6;--ok:#4ade80;--err:#f87171;--line2:#475569;--bg2:#111c34}
+[data-theme="light"]{--bg:#f6f8fc;--card:#ffffff;--line:#dde4f0;--fg:#16213a;--mut:#5b6b85;--accent:#2563eb;--accent2:#2563eb;--ok:#16a34a;--err:#dc2626;--line2:#dbe3f0;--bg2:#f1f5fb}
 *{box-sizing:border-box}
 body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:24px;line-height:1.5}
 main{max-width:680px;margin:0 auto}
@@ -72,7 +72,9 @@ th{color:var(--mut);font-weight:600;font-size:12px}
 a{color:#60a5fa}
 [data-theme="light"] a{color:#2563eb}
 .btn{display:inline-block;background:var(--accent);color:#fff;padding:11px 18px;border-radius:8px;font-weight:700;text-decoration:none}
-.btn-line{display:inline-block;padding:11px 18px;border-radius:8px;font-weight:700;text-decoration:none;border:1px solid var(--line)}
+.btn:hover{filter:brightness(1.1)}
+.btn-line{display:inline-block;padding:11px 18px;border-radius:8px;font-weight:700;text-decoration:none;border:1px solid var(--accent);color:var(--accent);background:transparent}
+.btn-line:hover{background:var(--bg2)}
 .theme-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:16px;margin-right:10px}
 </style>`;
 
@@ -405,7 +407,7 @@ router.get('/gestion/:token', (req, res) => {
   </div>
   <div class="bar"><div style="width:${pct}%"></div></div>
   <p class="muted">Participaciones: <b>${agg.c}</b> registradas · Importe registrado: <b>${agg.s.toFixed(2)}€</b> · Pendiente: <b>${saldo.toFixed(2)}€ / ${(100-pct).toFixed(0)}%</b></p>
-  ${cerrado ? '<p class="muted" style="color:var(--ok)">Este reparto está cerrado. No se pueden añadir más participaciones.</p>' : ''}
+  ${cerrado ? `<p class="muted" style="color:var(--ok)">Este reparto está cerrado. No se pueden añadir más participaciones.</p>${d.firmado_org_at ? `<p class="muted" style="font-size:12px;color:var(--ok)">✓ Firma del organizador registrada: ${esc(d.firmado_org_at)} (al cerrar el reparto).</p>` : ''}` : ''}
 </div>
 
 <div class="card">

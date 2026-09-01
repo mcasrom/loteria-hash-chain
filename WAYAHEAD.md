@@ -21,3 +21,8 @@
 
 ## Bitácora de cambios recientes
 - 2026-09-01: despliegue real documentado (`610571e`), og https vía trust proxy (`dded602`), fix og dominio raíz (`68b2e87`), fix css (`18c05e6`), firma condicional PDF (`138f8dc`), seguridad+retención (`aa0e923`), modalidad A+D (`7eb5c3e`), fix IIFE panel (`70e986a`).
+
+## Política de retención
+
+- **Lotería**: anonimización a los **12 meses** del cierre del reparto (endpoint `/admin/retencion`, cron dominical con `ADMIN_TOKEN`). Conserva agregados para verificación.
+- Documento central del ecosistema con todas las políticas: ver `RETENCION.md` en `mcasrom/nearme-osint`.

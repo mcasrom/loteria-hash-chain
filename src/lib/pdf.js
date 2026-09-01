@@ -59,6 +59,7 @@ async function generarPdf({ participacionId, numero, serie, sorteo, importe, nom
   page.drawText('   (La integridad de la cadena de hashes garantiza que los importes', { x: 50, y: y(590), size: 9, font });
   page.drawText('    no han sido alterados después de su emisión.)', { x: 50, y: y(604), size: 9, font });
 
+  page.drawText('Firma del partícipe: ______________________   Fecha: ______', { x: 50, y: y(650), size: 11, font });
   page.drawText('Firma del depositario: ______________________   Fecha: ______', { x: 50, y: y(680), size: 11, font });
 
   const buf = await pdf.save();

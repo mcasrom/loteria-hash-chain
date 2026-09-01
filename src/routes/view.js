@@ -485,7 +485,7 @@ function copyTexto(txt){
     .catch(function(){ prompt('Copia este enlace:', txt); });
 }
 function descargarRecuperacion(id, enlace){
-  var txt = 'REGISTRO DE PARTICIPACIONES - CÓDIGO DE RECUPERACIÓN\n\nID del reparto: ' + id + '\nEnlace de gestión: ' + enlace + '\n\nGuárdalo en lugar seguro. Este enlace es tu acceso privado para gestionar el reparto.\n';
+  var txt = 'REGISTRO DE PARTICIPACIONES - CÓDIGO DE RECUPERACIÓN\\n\\nID del reparto: ' + id + '\\nEnlace de gestión: ' + enlace + '\\n\\nGuárdalo en lugar seguro. Este enlace es tu acceso privado para gestionar el reparto.\\n';
   var blob = new Blob([txt], {type:'text/plain'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

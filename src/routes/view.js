@@ -78,14 +78,22 @@ router.get('/', (req, res) => {
 <meta property="og:description" content="Crea tu sorteo, comparte el enlace, cada uno recibe su comprobante con QR. Integro y privado.">
 <style>
 :root{--bg:#070b18;--bg2:#0d1528;--card:#101b33;--card2:#0a1226;--line:#1c2a47;--line2:#26365a;
---fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171}
+--fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171;
+--shadow:rgba(0,0,0,.4)}
+[data-theme="light"]{--bg:#f6f8fc;--bg2:#ffffff;--card:#ffffff;--card2:#f0f4fa;--line:#dde4f0;--line2:#c3cee0;
+--fg:#16213a;--mut:#5b6b85;--accent:#d97706;--accent2:#2563eb;--ok:#059669;--warn:#d97706;--danger:#dc2626;
+--shadow:rgba(15,23,42,.12)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(1000px 600px at 85% -5%,rgba(245,158,11,.10),transparent),
 radial-gradient(800px 500px at 0% 0%,rgba(59,130,246,.10),transparent),var(--bg);color:var(--fg);margin:0;line-height:1.65}
 .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+/* TEMA */
+.theme-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center;margin-left:14px;transition:background .2s}
+.theme-btn:hover{background:var(--bg2)}
 /* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
+.nav-links{display:flex;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
 .brand .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#fb923c);display:flex;align-items:center;justify-content:center;font-size:18px}
 nav a{color:var(--mut);text-decoration:none;font-size:14px;margin-left:22px}
@@ -130,7 +138,7 @@ input:focus{border-color:var(--accent2)}
 /* MOCK */
 .mock-wrap{display:grid;gap:24px;grid-template-columns:1.1fr .9fr;align-items:center}
 @media(max-width:800px){.mock-wrap{grid-template-columns:1fr}}
-.mock{background:linear-gradient(150deg,#1a2747,#101b33);border:1px solid var(--line2);border-radius:18px;padding:24px;max-width:340px}
+.mock{background:linear-gradient(150deg,var(--bg2),var(--card));border:1px solid var(--line2);border-radius:18px;padding:24px;max-width:340px}
 .mock .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .mock .num{font-family:monospace;font-size:30px;font-weight:800;color:var(--accent)}
 .mock .serie{color:var(--mut);font-size:14px}
@@ -151,16 +159,18 @@ footer a{color:var(--accent);text-decoration:none}
 </style></head><body>
 <div class="wrap">
 <nav>
-  <div class="brand"><div class="logo">🎟️</div> Sorteos en Participaciones</div>
-  <div><a href="#crear">Crear sorteo</a><a href="#como">Cómo funciona</a><a href="#metodo">Metodología</a></div>
+  <div class="brand"><div class="logo">✓</div> Registro de participaciones</div>
+  <div class="nav-links"><a href="#registrar">Registrar</a><a href="#como">Cómo funciona</a><a href="#metodo">Metodología</a>
+    <button class="theme-btn" onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button>
+  </div>
 </nav>
 
 <header class="hero">
-  <span class="badge">✓ Comprobante con QR · ✓ Privado · ✓ Integro</span>
-  <h1>Reparte cualquier sorteo en participaciones, sin líos</h1>
-  <p>Décimo de Navidad, rifa del cole, apuesta entre amigos, evento solidario... Cada persona aporta su parte y recibe su <b>comprobante personal</b> con QR. Tú ves tu sorteo; cada partícipe ve solo lo suyo.</p>
-  <div class="sub-badges"><span>🔗 Cadena de integridad</span><span>🔒 Comprobante privado</span><span>📄 PDF legal</span><span>📱 Listo para WhatsApp</span></div>
-  <a class="cta" href="#crear">🎟️ Crear mi sorteo</a>
+  <span class="badge">✓ Confirma participaciones · ✓ Verifica el premio · ✓ Privado</span>
+  <h1>Registra y verifica las participaciones de tu premio</h1>
+  <p>Un décimo, una rifa, un sorteo o un premio que ya existe: aquí se registran las participaciones, se confirma quién aporta cuánto y se emite un <b>comprobante verificable</b> a cada partícipe. Nadie inventa el sorteo: esto solo documenta quién participa y qué le corresponde.</p>
+  <div class="sub-badges"><span>🔗 Integridad de los registros</span><span>🔒 Comprobante privado</span><span>📄 PDF legal</span><span>📱 Listo para WhatsApp</span></div>
+  <a class="cta" href="#registrar">🎟️ Empezar el registro</a>
 </header>
 
 <section id="crear">
@@ -261,6 +271,24 @@ footer a{color:var(--accent);text-decoration:none}
   <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Open source · Los servidores los paga su autor</span>
 </footer>
 </div>
+<script>
+(function(){
+  var root = document.documentElement;
+  var btn = document.querySelector('.theme-btn');
+  function apply(t){
+    if (t === 'light') { root.setAttribute('data-theme','light'); btn.textContent = '☀️'; }
+    else { root.removeAttribute('data-theme'); btn.textContent = '🌙'; }
+  }
+  var saved = 'light';
+  try { saved = localStorage.getItem('tema') || 'dark'; } catch(e){}
+  apply(saved === 'light' ? 'light' : 'dark');
+  window.toggleTheme = function(){
+    var cur = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    apply(cur);
+    try { localStorage.setItem('tema', cur); } catch(e){}
+  };
+})();
+</script>
 </body></html>`);
 });
 

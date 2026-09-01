@@ -9,11 +9,12 @@ const fs = require('fs');
 
 const OUT_IMAGES = path.join(__dirname, '..', '..', 'output-samples', 'imagenes');
 
-async function generarImagen({ participacionId, numero, serie, sorteo, importe, nombre, decimoId, baseUrl }) {
+async function generarImagen({ participacionId, numero, serie, sorteo, importe, nombre, decimoId, baseUrl, accessToken }) {
   fs.mkdirSync(OUT_IMAGES, { recursive: true });
 
-  // QR con la URL de verificación
-  const url = `${baseUrl}/verificar/${decimoId}`;
+  // QR apunta al COMPROBANTE PRIVADO de esta participación (no a la verificación
+  // pública): al escanearlo se abre el comprobante de quien lo tiene.
+  const url = `${baseUrl}/mi-participacion/${accessToken}`;
   const qrBuf = await QRCode.toBuffer(url, { width: 240, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } });
 
   const W = 800, H = 1000;

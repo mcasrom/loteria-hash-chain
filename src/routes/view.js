@@ -60,6 +60,8 @@ td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
 th{color:var(--mut);font-weight:600;font-size:12px}
 .del-btn{background:transparent;border:1px solid var(--line);color:#f87171;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px}
 .del-btn:hover{background:rgba(248,113,113,.15);border-color:#f87171}
+.share-btn{background:transparent;border:1px solid var(--line);color:var(--accent);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px}
+.share-btn:hover{background:rgba(59,130,246,.15);border-color:var(--accent)}
 .join{background:#0f172a;border:1px dashed var(--line);border-radius:12px;padding:16px;margin-top:12px}
 .join-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .join input{flex:1;min-width:120px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:14px}
@@ -74,10 +76,10 @@ a{color:#60a5fa}
 router.get('/', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Reparte participaciones de sorteos con comprobante</title>
+<title>Registra participaciones de tu sorteo con comprobante</title>
 <meta name="description" content="Organiza participaciones de cualquier sorteo, rifa o décimo. Cada persona aporta su parte y recibe su comprobante con QR. Con integridad y privacidad.">
 <meta property="og:title" content="Participaciones de sorteos con comprobante">
-<meta property="og:description" content="Crea tu sorteo, comparte el enlace, cada uno recibe su comprobante con QR. Integro y privado.">
+<meta property="og:description" content="Registra las participaciones de tu sorteo. Cada partícipe recibe su comprobante con QR. Integro y privado.">
 <style>
 :root{--bg:#070b18;--bg2:#0d1528;--card:#101b33;--card2:#0a1226;--line:#1c2a47;--line2:#26365a;
 --fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171;
@@ -168,27 +170,27 @@ footer a{color:var(--accent);text-decoration:none}
 </nav>
 
 <header class="hero">
-  <span class="badge">✓ Confirma participaciones · ✓ Verifica el premio · ✓ Privado</span>
-  <h1>Registra y verifica las participaciones de tu premio</h1>
-  <p>Un décimo, una rifa, un sorteo o un premio que ya existe: aquí se registran las participaciones, se confirma quién aporta cuánto y se emite un <b>comprobante verificable</b> a cada partícipe. Nadie inventa el sorteo: esto solo documenta quién participa y qué le corresponde.</p>
+  <span class="badge">✓ Confirma participaciones · ✓ Verifica tu participación · ✓ Privado</span>
+  <h1>Registra las participaciones de tu sorteo</h1>
+  <p>Tu sorteo ya existe (un décimo, una rifa, un evento). Aquí se registran las <b>participaciones</b>: quién participa, con cuánto y qué le corresponde si toca. Cada partícipe recibe un <b>comprobante verificable</b>. No creamos sorteos: documentamos quién participa en el tuyo.</p>
   <div class="sub-badges"><span>🔗 Integridad de los registros</span><span>🔒 Comprobante privado</span><span>📄 PDF legal</span><span>📱 Listo para WhatsApp</span></div>
-  <a class="cta" href="#registrar">🎟️ Empezar el registro</a>
+  <a class="cta" href="#registrar">🎟️ Registrar participaciones</a>
 </header>
 
 <section id="crear">
   <div class="form-shell">
-    <h3>🎟️ Crea tu sorteo o reparto</h3>
-    <p class="hint">Solo necesitas estos datos para empezar. El resto lo hace la herramienta.</p>
+    <h3>🎟️ Registra las participaciones de tu sorteo</h3>
+    <p class="hint">Pon los datos de TU sorteo (no lo creamos, solo lo documentamos). El resto lo hace la herramienta.</p>
     <form method="POST" action="/decimos">
       <div class="grid2">
         <input name="numero" placeholder="Número (si lo hay, ej. 85432)">
         <input name="serie" placeholder="Serie (si lo hay)">
-        <input name="sorteo" placeholder="Nombre del sorteo o evento" value="Sorteo compartido">
+        <input name="sorteo" placeholder="Nombre de tu sorteo (ej. Décimo de Navidad)" value="Sorteo compartido">
         <input name="valor_total" type="number" step="0.01" min="1" value="20" placeholder="Valor total €" required>
       </div>
-      <button class="btn-big">🎟️ Crear reparto</button>
+      <button class="btn-big">🎟️ Empezar a registrar participaciones</button>
     </form>
-    <p class="mini">Al crearlo obtienes un enlace privado de gestión. Cada partícipe recibe su comprobante; nadie ve lo que aportan los demás.</p>
+    <p class="mini">Al empezar obtienes un enlace privado de gestión. Cada partícipe aporta su parte y recibe su comprobante; nadie ve lo que ponen los demás.</p>
   </div>
 </section>
 
@@ -197,9 +199,9 @@ footer a{color:var(--accent);text-decoration:none}
   <h2 class="sec">Tres pasos</h2>
   <p class="sec-sub">Sin cuentas, sin registros, sin listas raras.</p>
   <div class="steps">
-    <div class="step"><span class="n">1</span><div class="ic">🎟️</div><b>Crea tu sorteo</b><p>Introduce número, serie y valor. Obtienes un panel privado solo para tu sorteo.</p></div>
-    <div class="step"><span class="n">2</span><div class="ic">📤</div><b>Comparte el enlace</b><p>Envías el enlace a quien quiera entrar. Cada uno pone su importe, sin ver a los demás.</p></div>
-    <div class="step"><span class="n">3</span><div class="ic">📲</div><b>Reparte comprobantes</b><p>Cada partícipe recibe su imagen con QR y su PDF. Se guardan y se comparten por WhatsApp.</p></div>
+    <div class="step"><span class="n">1</span><div class="ic">🎟️</div><b>Registra tu sorteo</b><p>Introduce el número (si lo hay) y el valor total. Obtienes un panel privado para gestionar sus participaciones.</p></div>
+    <div class="step"><span class="n">2</span><div class="ic">📤</div><b>Comparte el enlace</b><p>Envías el enlace a quien quiera participar. Cada uno aporta su parte, sin ver a los demás.</p></div>
+    <div class="step"><span class="n">3</span><div class="ic">📲</div><b>Entrega comprobantes</b><p>Cada partícipe recibe su imagen con QR y su PDF. Se guardan y se comparten por WhatsApp.</p></div>
   </div>
 </section>
 
@@ -212,7 +214,7 @@ footer a{color:var(--accent);text-decoration:none}
       <div class="head"><div class="num">85432</div><div class="serie">serie 021</div></div>
       <div class="row"><span>Participante</span><b>Ana</b></div>
       <div class="row"><span>Aportación</span><b>10,00 €</b></div>
-      <div class="row"><span>% del premio</span><b>50%</b></div>
+      <div class="row"><span>% del sorteo</span><b>50%</b></div>
       <div class="row"><span>Estado</span><b style="color:var(--ok)">✓ válido</b></div>
       <div class="qr">QR</div>
     </div>
@@ -220,7 +222,7 @@ footer a{color:var(--accent);text-decoration:none}
       <p style="margin-top:0">Cada comprobante incluye:</p>
       <ul>
         <li>Número, serie y nombre del sorteo.</li>
-        <li>Tu nombre, tu importe y tu <b>% del premio</b>.</li>
+        <li>Tu nombre, tu importe y tu <b>% de participación</b>.</li>
         <li>Un <b>QR</b> que abre la verificación pública del sorteo.</li>
         <li>Tu <b>PDF legal</b> con firma del partícipe y del organizador.</li>
         <li>Un <b>enlace privado</b> solo tuyo (no se vuelve a mostrar a nadie).</li>
@@ -238,9 +240,9 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada aportación se encadena con un hash. Si alguien toca un importe después, la verificación pública lo detecta y lo marca como alterado.</p></div></div>
     <div class="feat"><div class="ic">🔒</div><div><b>Comprobante privado</b><p>Cada participante ve solo su parte. No hay listas públicas con nombres e importes.</p></div></div>
     <div class="feat"><div class="ic">🕵️</div><div><b>Verificación anónima</b><p>La página pública de verificación muestra solo total, saldo y estado. Nunca quién puso cuánto.</p></div></div>
-    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF referencia la comunidad de bienes (Código Civil) y el reparto proporcional del premio.</p></div></div>
+    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF referencia la comunidad de bienes (Código Civil) y tu % de participación en el sorteo.</p></div></div>
     <div class="feat"><div class="ic">🛡️</div><div><b>Anti-fuerza bruta</b><p>Accesos a comprobantes con límite por IP y registro. Los intentos de adivinar quedan detectados.</p></div></div>
-    <div class="feat"><div class="ic">🧾</div><div><b>Reparto claro</b><p>Cada partícipe ve su % exacto del premio. Si toca, cada uno sabe lo que le corresponde.</p></div></div>
+    <div class="feat"><div class="ic">🧾</div><div><b>Reparto claro</b><p>Cada partícipe ve su % exacto de participación. Si toca, cada uno sabe lo que le corresponde.</p></div></div>
   </div>
 </section>
 
@@ -253,7 +255,7 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="feat"><div class="ic">🛡️</div><div><b>Detección de manipulación</b><p>Si alguien toca un importe en la base de datos, el hash deja de cuadrar con el siguiente y la verificación pública marca el sorteo como ALTERADO. Está demostrado por un test automatizado que cambia un importe y comprueba que se rompe.</p></div></div>
     <div class="feat"><div class="ic">🔒</div><div><b>Comprobante por token secreto</b><p>Cada partícipe accede a su comprobante con un código de 256 bits generado al azar. No se puede adivinar ni enumerar. El identificador interno de la base de datos nunca se expone en una URL pública.</p></div></div>
     <div class="feat"><div class="ic">🕵️</div><div><b>Privacidad por diseño</b><p>El partícipe ve solo su comprobante. La verificación pública muestra únicamente total, saldo y estado de la cadena — nunca nombres ni importes individuales. Solo el organizador ve a los partícipes de SU sorteo.</p></div></div>
-    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF incluye tu nombre, tu aportación, tu % del premio y referencia a la comunidad de bienes (Código Civil), con firma del partícipe y del organizador.</p></div></div>
+    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF incluye tu nombre, tu aportación, tu % de participación y referencia a la comunidad de bienes (Código Civil), con firma del partícipe y del organizador.</p></div></div>
     <div class="feat"><div class="ic">🛡️</div><div><b>Anti-fuerza bruta</b><p>Accesos a comprobantes con límite por IP (20 intentos fallidos / 10 min) y registro en log. Un intento de adivinar tokens queda detectado.</p></div></div>
   </div>
 </section>
@@ -262,14 +264,14 @@ footer a{color:var(--accent);text-decoration:none}
   <p class="sec-tag">Transparencia</p>
   <h2 class="sec">Qué garantiza esto — y qué no</h2>
   <div class="feats" style="grid-template-columns:1fr 1fr">
-    <div class="feat" style="border-color:rgba(52,211,153,.3)"><div class="ic">✅</div><div><b>Garantiza</b><p style="margin-bottom:4px">· Que los importes registrados no se alteran después de emitirse (hash encadenado).<br>· Que cada comprobante es privado y solo accesible con su token.<br>· Que cada partícipe tiene su % exacto del reparto por escrito.</p></div></div>
-    <div class="feat" style="border-color:rgba(248,113,113,.3)"><div class="ic">⚠️</div><div><b>No garantiza</b><p style="margin-bottom:0">· Que el boleto o premio físico exista: eso depende del organizador, que es quien lo deposita.<br>· La identidad real de los partícipes (se registra el nombre que se declara).<br>· Que sea una blockchain descentralizada: es una base SQLite con hashes, suficiente para este uso.</p></div></div>
+    <div class="feat" style="border-color:rgba(52,211,153,.3)"><div class="ic">✅</div><div><b>Garantiza</b><p style="margin-bottom:4px">· Que los importes registrados no se alteran después de emitirse (hash encadenado).<br>· Que cada comprobante es privado y solo accesible con su token.<br>· Que cada partícipe tiene su % exacto de participación por escrito.</p></div></div>
+    <div class="feat" style="border-color:rgba(248,113,113,.3)"><div class="ic">⚠️</div><div><b>No garantiza</b><p style="margin-bottom:0">· Que el boleto o décimo físico exista: eso depende del organizador, que es quien lo deposita.<br>· La identidad real de los partícipes (se registra el nombre que se declara).<br>· Que sea una blockchain descentralizada: es una base SQLite con hashes, suficiente para este uso.</p></div></div>
   </div>
 </section>
 
 <footer>
   <b>Participaciones de sorteos con comprobante</b> · Cualquier evento: sorteos, rifas, apuestas, solidario<br>
-  <a href="#crear">Crear sorteo</a> · <a href="#metodo">Metodología</a> · <a href="mailto:info@viajeinteligencia.com">info@viajeinteligencia.com</a><br>
+  <a href="#crear">Registrar participaciones</a> · <a href="#metodo">Metodología</a> · <a href="mailto:info@viajeinteligencia.com">info@viajeinteligencia.com</a><br>
   <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Open source · Los servidores los paga su autor</span>
 </footer>
 </div>
@@ -322,7 +324,7 @@ router.get('/decimo/:id', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Décimo ${d.numero} · gestión</title>${css}</head><body>
 <main>
-<p class="muted"><a href="/">← Crear otro décimo</a></p>
+<p class="muted"><a href="/">← Registrar otro sorteo</a></p>
 <div class="card">
   <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
     <div><h1 style="margin:0">Décimo ${esc(d.numero)} · ${esc(d.serie)}</h1>
@@ -340,14 +342,16 @@ router.get('/decimo/:id', (req, res) => {
 </div>
 <div class="card">
 <h2>Participaciones de TU décimo (${parts.length})</h2>
-${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>Comprobante</th><th></th></tr>
+${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>Comprobante</th><th>Compartir</th><th></th></tr>
 ${parts.map((p, i) => {
   const esUltima = i === parts.length - 1;
+  const linkPart = `${base(req)}/mi-participacion/${p.access_token}`;
   return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}</td><td>${p.importe.toFixed(2)}€</td>
-<td class="mono"><a href="/mi-participacion/${p.access_token}">abrir</a></td>
+<td class="mono"><a href="${linkPart}" target="_blank">abrir</a></td>
+<td><button class="share-btn" onclick="compartir('${linkPart}','${esc(p.nombre_participante) || 'tu'}','${d.id}')">📤</button></td>
 <td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
 }).join('')}</table>
-<p class="muted" style="font-size:12px">🗑 Solo se puede eliminar la <b>última</b> participación (para corregir un doble clic o un error). Las anteriores no se tocan para no romper la cadena de integridad.</p>`
+<p class="muted" style="font-size:12px">📤 Compartir copia el enlace del comprobante o lo abre en WhatsApp con el texto listo. 🗑 Solo se puede eliminar la <b>última</b> participación (para corregir un doble clic o un error). Las anteriores no se tocan para no romper la cadena de integridad.</p>`
   : '<p class="muted">Aún no hay participaciones.</p>'}
 </div>
 <div class="card">
@@ -377,6 +381,22 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   msg.innerHTML='✓ Comprobante: <a href="/mi-participacion/'+data.access_token+'">ver / enviar</a>';
   setTimeout(function(){location.reload();},1800);
 });
+function compartir(link, nombre, did){
+  var texto = '🎟️ Tu participación está registrada. Abre tu comprobante aquí: ' + link;
+  var op = confirm('Compartir con ' + nombre + ':\n\n[OK] Copiar enlace\n[Cancelar] Abrir WhatsApp con el mensaje listo');
+  if (op) {
+    // copiar al portapapeles
+    (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject())
+      .then(function(){ alert('Enlace copiado: ' + link); })
+      .catch(function(){
+        // fallback: prompt para copiar manual
+        prompt('Copia este enlace:', link);
+      });
+  } else {
+    var wa = 'https://wa.me/?text=' + encodeURIComponent(texto);
+    window.open(wa, '_blank');
+  }
+}
 async function eliminarUltima(did){
   if(!confirm('¿Eliminar la última participación? Esta acción no se puede deshacer. La cadena de integridad se mantiene (solo se quita la última).')) return;
   var r=await fetch('/decimos/'+did+'/participaciones/ultima',{method:'DELETE'});
@@ -467,7 +487,7 @@ router.get('/mi-participacion/:token', (req, res) => {
   <div class="kpis">
     <div class="kpi"><b>Décimo ${esc(d.numero)}</b><span>serie ${esc(d.serie)}</span></div>
     <div class="kpi"><b>${p.importe.toFixed(2)}€</b><span>tu aportación</span></div>
-    <div class="kpi"><b>${pct}%</b><span>del premio</span></div>
+    <div class="kpi"><b>${pct}%</b><span>de participación</span></div>
     <div class="kpi"><b>${esc(p.nombre_participante) || 'Anónimo'}</b><span>partícipe</span></div>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">

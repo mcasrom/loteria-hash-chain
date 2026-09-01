@@ -34,6 +34,7 @@ app.post('/decimos/:id/participaciones', async (req, res) => {
     imagen = await generarImagen({
       participacionId: r.participacion.id, numero: decimo.numero, serie: decimo.serie,
       sorteo: decimo.sorteo, importe, nombre, decimoId: decimo.id, baseUrl: base,
+      accessToken: r.participacion.access_token,
     });
   } catch (e) { console.error('imagen err:', e.message); }
   try {

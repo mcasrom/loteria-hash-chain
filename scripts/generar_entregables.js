@@ -16,7 +16,7 @@ const { generarPdf } = require('../src/lib/pdf');
         const img = await generarImagen({
           participacionId: p.id, numero: d.numero, serie: d.serie, sorteo: d.sorteo,
           importe: p.importe, nombre: p.nombre_participante, decimoId: d.id,
-          baseUrl: 'http://localhost:3005',
+          baseUrl: 'http://localhost:3005', accessToken: p.access_token,
         });
         const pdf = await generarPdf({
           participacionId: p.id, numero: d.numero, serie: d.serie, sorteo: d.sorteo,

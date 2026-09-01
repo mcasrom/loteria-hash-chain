@@ -5,19 +5,21 @@ const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 
-let db, dbPath, addParticipacion, validateChain, computeChain, decimoId;
+let db, dbPath, addParticipacion, validateChain, computeChain, eliminarUltima, decimoId;
+
+// Cargar los módulos UNA sola vez (no por test). La BD se abre con DB_PATH
+// temporal distinto en cada test; schema.openDb lee DB_PATH en cada llamada.
+const schema = require('../src/db/schema');
+const chain = require('../src/db/chain');
 
 function freshDb() {
   dbPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'loteria-')), 'test.db');
   process.env.DB_PATH = dbPath;
-  delete require.cache[require.resolve('../src/db/schema')];
-  delete require.cache[require.resolve('../src/db/chain')];
-  const schema2 = require('../src/db/schema');
-  const chain2 = require('../src/db/chain');
-  db = schema2.openDb();
-  addParticipacion = chain2.addParticipacion;
-  validateChain = chain2.validateChain;
-  computeChain = chain2.computeChain;
+  db = schema.openDb();
+  addParticipacion = chain.addParticipacion;
+  validateChain = chain.validateChain;
+  computeChain = chain.computeChain;
+  eliminarUltima = chain.eliminarUltimaParticipacion;
 }
 
 beforeEach(() => {
@@ -109,7 +111,7 @@ test('eliminar la última participación NO rompe la cadena', () => {
   addParticipacion(db, { decimoId, importe: 5, nombre: 'Marta' });
   expect(validateChain(db, decimoId)).toBe(true);
   // eliminar la última (Marta)
-  const r = require('../src/db/chain').eliminarUltimaParticipacion(db, decimoId);
+  const r = eliminarUltima(db, decimoId);
   expect(r.ok).toBe(true);
   expect(r.participacion.nombre).toBe('Marta');
   // la cadena sigue siendo válida (las 2 restantes encadenan bien)

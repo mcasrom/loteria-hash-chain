@@ -68,34 +68,206 @@ a{color:#60a5fa}
 .btn-line{display:inline-block;padding:11px 18px;border-radius:8px;font-weight:700;text-decoration:none;border:1px solid var(--line)}
 </style>`;
 
-// 1. Raíz: crear un décimo
+// 1. Raíz: landing completa y pulida (genérica para cualquier sorteo)
 router.get('/', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Lotería Hash-Chain</title>${css}</head><body>
-<main>
-<h1>🎄 Lotería Hash-Chain</h1>
-<p class="muted">Organiza un décimo de Lotería de Navidad en participaciones con cadena de hashes verificable.</p>
-<div class="card">
-<h2>Crear un décimo</h2>
-<form method="POST" action="/decimos">
-  <div class="join-row">
-    <input name="numero" placeholder="Número (ej. 85432)" required>
-    <input name="serie" placeholder="Serie (ej. 021)" required>
-    <input name="sorteo" placeholder="Sorteo" value="Sorteo de Navidad 2026">
-    <input name="valor_total" type="number" step="0.01" min="1" value="20" required>
-    <button>Crear</button>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reparte participaciones de sorteos con comprobante</title>
+<meta name="description" content="Organiza participaciones de cualquier sorteo, rifa o décimo. Cada persona aporta su parte y recibe su comprobante con QR. Con integridad y privacidad.">
+<meta property="og:title" content="Participaciones de sorteos con comprobante">
+<meta property="og:description" content="Crea tu sorteo, comparte el enlace, cada uno recibe su comprobante con QR. Integro y privado.">
+<style>
+:root{--bg:#070b18;--bg2:#0d1528;--card:#101b33;--card2:#0a1226;--line:#1c2a47;--line2:#26365a;
+--fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(1000px 600px at 85% -5%,rgba(245,158,11,.10),transparent),
+radial-gradient(800px 500px at 0% 0%,rgba(59,130,246,.10),transparent),var(--bg);color:var(--fg);margin:0;line-height:1.65}
+.wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
+.brand .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#fb923c);display:flex;align-items:center;justify-content:center;font-size:18px}
+nav a{color:var(--mut);text-decoration:none;font-size:14px;margin-left:22px}
+nav a:hover{color:var(--fg)}
+/* HERO */
+.hero{text-align:center;padding:64px 0 48px}
+.hero .badge{display:inline-block;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--ok);font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:30px;margin-bottom:18px}
+.hero h1{font-size:44px;line-height:1.15;margin:0 0 16px;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:18px;color:var(--mut);max-width:620px;margin:0 auto}
+.hero .sub-badges{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero .sub-badges span{font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 14px}
+.cta{display:inline-block;margin-top:30px;background:linear-gradient(90deg,var(--accent2),#60a5fa);color:#fff;padding:16px 36px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none;box-shadow:0 12px 34px rgba(59,130,246,.4)}
+.cta:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(59,130,246,.5)}
+/* SECCIONES */
+section{padding:56px 0}
+.sec-tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800;margin:0 0 8px}
+h2.sec{font-size:30px;margin:0 0 8px}
+.sec-sub{color:var(--mut);font-size:15px;margin:0 0 30px}
+/* FORM */
+.form-shell{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:20px;padding:34px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.form-shell h3{margin:0 0 6px;font-size:22px}
+.form-shell .hint{color:var(--mut);font-size:14px;margin:0 0 22px}
+.grid2{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+input,select{width:100%;padding:14px 15px;border-radius:11px;border:1px solid var(--line2);background:var(--bg2);color:var(--fg);font-size:15px;outline:none}
+input:focus{border-color:var(--accent2)}
+.btn-big{width:100%;margin-top:18px;background:linear-gradient(90deg,var(--accent2),#60a5fa);color:#fff;border:none;padding:16px;border-radius:12px;font-weight:800;font-size:17px;cursor:pointer}
+.btn-big:hover{filter:brightness(1.1)}
+.form-shell .mini{color:var(--mut);font-size:12.5px;margin:14px 0 0;text-align:center}
+/* PASOS */
+.steps{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;position:relative}
+.step .n{position:absolute;top:18px;right:20px;font-size:40px;font-weight:800;color:rgba(255,255,255,.05)}
+.step .ic{width:48px;height:48px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
+.step b{font-size:17px;display:block;margin-bottom:6px}
+.step p{color:var(--mut);font-size:14px;margin:0}
+/* FEATURES */
+.feats{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;gap:14px;align-items:flex-start}
+.feat .ic{font-size:24px;flex-shrink:0}
+.feat b{display:block;font-size:16px;margin-bottom:4px}
+.feat p{color:var(--mut);font-size:13.5px;margin:0}
+/* MOCK */
+.mock-wrap{display:grid;gap:24px;grid-template-columns:1.1fr .9fr;align-items:center}
+@media(max-width:800px){.mock-wrap{grid-template-columns:1fr}}
+.mock{background:linear-gradient(150deg,#1a2747,#101b33);border:1px solid var(--line2);border-radius:18px;padding:24px;max-width:340px}
+.mock .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.mock .num{font-family:monospace;font-size:30px;font-weight:800;color:var(--accent)}
+.mock .serie{color:var(--mut);font-size:14px}
+.mock .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mock .row span{color:var(--mut)}
+.mock .row b{font-size:15px}
+.mock .qr{margin:18px auto 0;width:110px;height:110px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#0a0f1e;font-weight:800;font-size:13px}
+.mock-cap{color:var(--mut);font-size:13px;line-height:1.7}
+.mock-cap b{color:var(--fg)}
+.mock-cap ul{padding-left:18px;margin:12px 0 0}
+/* FAQ */
+.faq details{border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:10px;background:var(--card)}
+.faq summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--fg)}
+.faq details p{color:var(--mut);font-size:14px;margin:12px 0 0}
+/* FOOTER */
+footer{border-top:1px solid var(--line);margin-top:40px;padding:34px 0 50px;text-align:center;color:var(--mut);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+</style></head><body>
+<div class="wrap">
+<nav>
+  <div class="brand"><div class="logo">🎟️</div> Sorteos en Participaciones</div>
+  <div><a href="#crear">Crear sorteo</a><a href="#como">Cómo funciona</a><a href="#metodo">Metodología</a></div>
+</nav>
+
+<header class="hero">
+  <span class="badge">✓ Comprobante con QR · ✓ Privado · ✓ Integro</span>
+  <h1>Reparte cualquier sorteo en participaciones, sin líos</h1>
+  <p>Décimo de Navidad, rifa del cole, apuesta entre amigos, evento solidario... Cada persona aporta su parte y recibe su <b>comprobante personal</b> con QR. Tú ves tu sorteo; cada partícipe ve solo lo suyo.</p>
+  <div class="sub-badges"><span>🔗 Cadena de integridad</span><span>🔒 Comprobante privado</span><span>📄 PDF legal</span><span>📱 Listo para WhatsApp</span></div>
+  <a class="cta" href="#crear">🎟️ Crear mi sorteo</a>
+</header>
+
+<section id="crear">
+  <div class="form-shell">
+    <h3>🎟️ Crea tu sorteo o reparto</h3>
+    <p class="hint">Solo necesitas estos datos para empezar. El resto lo hace la herramienta.</p>
+    <form method="POST" action="/decimos">
+      <div class="grid2">
+        <input name="numero" placeholder="Número (si lo hay, ej. 85432)">
+        <input name="serie" placeholder="Serie (si lo hay)">
+        <input name="sorteo" placeholder="Nombre del sorteo o evento" value="Sorteo compartido">
+        <input name="valor_total" type="number" step="0.01" min="1" value="20" placeholder="Valor total €" required>
+      </div>
+      <button class="btn-big">🎟️ Crear reparto</button>
+    </form>
+    <p class="mini">Al crearlo obtienes un enlace privado de gestión. Cada partícipe recibe su comprobante; nadie ve lo que aportan los demás.</p>
   </div>
-</form>
-<p class="muted" style="margin-top:10px">Cada partícipe recibe un comprobante con un <b>enlace secreto personal</b> (imagen + PDF). Nadie ve las aportaciones de los demás.</p>
+</section>
+
+<section id="como">
+  <p class="sec-tag">Así de simple</p>
+  <h2 class="sec">Tres pasos</h2>
+  <p class="sec-sub">Sin cuentas, sin registros, sin listas raras.</p>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div class="ic">🎟️</div><b>Crea tu sorteo</b><p>Introduce número, serie y valor. Obtienes un panel privado solo para tu sorteo.</p></div>
+    <div class="step"><span class="n">2</span><div class="ic">📤</div><b>Comparte el enlace</b><p>Envías el enlace a quien quiera entrar. Cada uno pone su importe, sin ver a los demás.</p></div>
+    <div class="step"><span class="n">3</span><div class="ic">📲</div><b>Reparte comprobantes</b><p>Cada partícipe recibe su imagen con QR y su PDF. Se guardan y se comparten por WhatsApp.</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="sec-tag">Lo que obtienes</p>
+  <h2 class="sec">El comprobante de cada partícipe</h2>
+  <p class="sec-sub">Imagen + PDF, con QR que abre la verificación pública (anónima).</p>
+  <div class="mock-wrap">
+    <div class="mock">
+      <div class="head"><div class="num">85432</div><div class="serie">serie 021</div></div>
+      <div class="row"><span>Participante</span><b>Ana</b></div>
+      <div class="row"><span>Aportación</span><b>10,00 €</b></div>
+      <div class="row"><span>% del premio</span><b>50%</b></div>
+      <div class="row"><span>Estado</span><b style="color:var(--ok)">✓ válido</b></div>
+      <div class="qr">QR</div>
+    </div>
+    <div class="mock-cap">
+      <p style="margin-top:0">Cada comprobante incluye:</p>
+      <ul>
+        <li>Número, serie y nombre del sorteo.</li>
+        <li>Tu nombre, tu importe y tu <b>% del premio</b>.</li>
+        <li>Un <b>QR</b> que abre la verificación pública del sorteo.</li>
+        <li>Tu <b>PDF legal</b> con firma del partícipe y del organizador.</li>
+        <li>Un <b>enlace privado</b> solo tuyo (no se vuelve a mostrar a nadie).</li>
+      </ul>
+      <p style="margin-bottom:0">El enlace del comprobante usa un <b>código secreto de 256 bits</b>: imposible de adivinar, y no existe otra forma de verlo.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="sec-tag">Por qué</p>
+  <h2 class="sec">Honestidad y privacidad, por diseño</h2>
+  <p class="sec-sub">Nada de depender de "la palabra del organizador".</p>
+  <div class="feats">
+    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada aportación se encadena con un hash. Si alguien toca un importe después, la verificación pública lo detecta y lo marca como alterado.</p></div></div>
+    <div class="feat"><div class="ic">🔒</div><div><b>Comprobante privado</b><p>Cada participante ve solo su parte. No hay listas públicas con nombres e importes.</p></div></div>
+    <div class="feat"><div class="ic">🕵️</div><div><b>Verificación anónima</b><p>La página pública de verificación muestra solo total, saldo y estado. Nunca quién puso cuánto.</p></div></div>
+    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF referencia la comunidad de bienes (Código Civil) y el reparto proporcional del premio.</p></div></div>
+    <div class="feat"><div class="ic">🛡️</div><div><b>Anti-fuerza bruta</b><p>Accesos a comprobantes con límite por IP y registro. Los intentos de adivinar quedan detectados.</p></div></div>
+    <div class="feat"><div class="ic">🧾</div><div><b>Reparto claro</b><p>Cada partícipe ve su % exacto del premio. Si toca, cada uno sabe lo que le corresponde.</p></div></div>
+  </div>
+</section>
+
+<section id="metodo">
+  <p class="sec-tag">Metodología</p>
+  <h2 class="sec">Cómo funciona por dentro, sin letra pequeña</h2>
+  <p class="sec-sub">Aquí no ocultamos nada. Esto es lo que hace el sistema, qué garantiza y qué no.</p>
+  <div class="feats">
+    <div class="feat"><div class="ic">🔗</div><div><b>Cadena de hashes (SHA-256)</b><p>Cada aportación guarda <code>hash_actual = SHA256(hash_anterior | sorteo | importe | timestamp)</code>. Cada bloque apunta al anterior. Es la misma función hash que usa TLS/Node nativo — no es un sistema inventado ni una blockchain.</p></div></div>
+    <div class="feat"><div class="ic">🛡️</div><div><b>Detección de manipulación</b><p>Si alguien toca un importe en la base de datos, el hash deja de cuadrar con el siguiente y la verificación pública marca el sorteo como ALTERADO. Está demostrado por un test automatizado que cambia un importe y comprueba que se rompe.</p></div></div>
+    <div class="feat"><div class="ic">🔒</div><div><b>Comprobante por token secreto</b><p>Cada partícipe accede a su comprobante con un código de 256 bits generado al azar. No se puede adivinar ni enumerar. El identificador interno de la base de datos nunca se expone en una URL pública.</p></div></div>
+    <div class="feat"><div class="ic">🕵️</div><div><b>Privacidad por diseño</b><p>El partícipe ve solo su comprobante. La verificación pública muestra únicamente total, saldo y estado de la cadena — nunca nombres ni importes individuales. Solo el organizador ve a los partícipes de SU sorteo.</p></div></div>
+    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF incluye tu nombre, tu aportación, tu % del premio y referencia a la comunidad de bienes (Código Civil), con firma del partícipe y del organizador.</p></div></div>
+    <div class="feat"><div class="ic">🛡️</div><div><b>Anti-fuerza bruta</b><p>Accesos a comprobantes con límite por IP (20 intentos fallidos / 10 min) y registro en log. Un intento de adivinar tokens queda detectado.</p></div></div>
+  </div>
+</section>
+
+<section id="honestidad" style="padding-top:0">
+  <p class="sec-tag">Transparencia</p>
+  <h2 class="sec">Qué garantiza esto — y qué no</h2>
+  <div class="feats" style="grid-template-columns:1fr 1fr">
+    <div class="feat" style="border-color:rgba(52,211,153,.3)"><div class="ic">✅</div><div><b>Garantiza</b><p style="margin-bottom:4px">· Que los importes registrados no se alteran después de emitirse (hash encadenado).<br>· Que cada comprobante es privado y solo accesible con su token.<br>· Que cada partícipe tiene su % exacto del reparto por escrito.</p></div></div>
+    <div class="feat" style="border-color:rgba(248,113,113,.3)"><div class="ic">⚠️</div><div><b>No garantiza</b><p style="margin-bottom:0">· Que el boleto o premio físico exista: eso depende del organizador, que es quien lo deposita.<br>· La identidad real de los partícipes (se registra el nombre que se declara).<br>· Que sea una blockchain descentralizada: es una base SQLite con hashes, suficiente para este uso.</p></div></div>
+  </div>
+</section>
+
+<footer>
+  <b>Participaciones de sorteos con comprobante</b> · Cualquier evento: sorteos, rifas, apuestas, solidario<br>
+  <a href="#crear">Crear sorteo</a> · <a href="#metodo">Metodología</a> · Open source · Los servidores los paga su autor
+</footer>
 </div>
-</main></body></html>`);
+</body></html>`);
 });
 
 // POST crear décimo
 router.post('/decimos', (req, res) => {
   const numero = String(req.body.numero || '').trim();
   const serie = String(req.body.serie || '').trim();
-  const sorteo = String(req.body.sorteo || 'Sorteo de Navidad 2026').trim();
+  const sorteo = String(req.body.sorteo || 'Sorteo compartido').trim();
   const valor_total = parseFloat(req.body.valor_total);
   if (!numero || !serie || !isFinite(valor_total) || valor_total <= 0)
     return res.status(400).send('Datos incompletos');
@@ -186,7 +358,7 @@ router.get('/participa/:decimoId', (req, res) => {
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Participa en el décimo ${d.numero}</title>${css}</head><body>
 <main>
 <div class="card">
-  <h1>🎄 Participa en el décimo ${esc(d.numero)} · ${esc(d.serie)}</h1>
+  <h1>🎟️ Participa en el décimo ${esc(d.numero)} · ${esc(d.serie)}</h1>
   <p class="muted">${esc(d.sorteo)}</p>
   <div class="kpis">
     <div class="kpi"><b>${d.valor_total.toFixed(2)}€</b><span>total</span></div>

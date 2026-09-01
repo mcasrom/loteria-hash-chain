@@ -2,11 +2,13 @@
 // Esquema de base de datos SQLite (fase 1).
 // Tablas: decimos, participaciones, usuarios.
 const path = require('path');
+const crypto = require('crypto');
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS decimos (
   id TEXT PRIMARY KEY,
   organizador_id TEXT NULL,
+  organizador_token TEXT NULL,
   numero TEXT NOT NULL,
   serie TEXT NOT NULL,
   sorteo TEXT NOT NULL,
@@ -50,6 +52,7 @@ function openDb() {
   const dbPath = process.env.DB_PATH || DB_PATH_DEFAULT;
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
   db.exec(SCHEMA);
   migrar(db);
   return db;
@@ -57,6 +60,16 @@ function openDb() {
 
 // Migración suave: añade columnas nuevas a BDs creadas con un esquema antiguo.
 function migrar(db) {
+  const colsDecimos = db.prepare(`PRAGMA table_info(decimos)`).all().map((c) => c.name);
+  if (!colsDecimos.includes('organizador_token')) {
+    db.exec(`ALTER TABLE decimos ADD COLUMN organizador_token TEXT NULL`);
+    // Backfill: generar token para los decimos existentes que no lo tienen
+    const rows = db.prepare(`SELECT id FROM decimos WHERE organizador_token IS NULL`).all();
+    for (const r of rows) {
+      db.prepare(`UPDATE decimos SET organizador_token = ? WHERE id = ?`).run(crypto.randomBytes(32).toString('hex'), r.id);
+    }
+  }
+
   const cols = db.prepare(`PRAGMA table_info(participaciones)`).all().map((c) => c.name);
   const nuevas = {
     modalidad: "TEXT NOT NULL DEFAULT 'aportada'",

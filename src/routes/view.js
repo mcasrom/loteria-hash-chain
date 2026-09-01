@@ -343,20 +343,29 @@ router.post('/decimos', (req, res) => {
   if (!isFinite(valor_total) || valor_total <= 0)
     return res.status(400).send('Error: falta el importe total del reparto');
   const id = crypto.randomUUID();
-  db.prepare('INSERT INTO decimos (id, organizador_id, numero, serie, sorteo, valor_total, created_at, estado) VALUES (?,?,?,?,?,?,?,?)')
-    .run(id, null, numero || '—', serie || '—', sorteo, valor_total, new Date().toISOString(), 'abierto');
-  res.redirect(303, `/decimo/${id}`);
+  const organizadorToken = crypto.randomBytes(32).toString('hex'); // 256 bits, secreto del creador
+  db.prepare('INSERT INTO decimos (id, organizador_id, organizador_token, numero, serie, sorteo, valor_total, created_at, estado) VALUES (?,?,?,?,?,?,?,?,?)')
+    .run(id, null, organizadorToken, numero || '—', serie || '—', sorteo, valor_total, new Date().toISOString(), 'abierto');
+  res.redirect(303, `/gestion/${organizadorToken}`);
 });
 
 // 2. Panel del ORGANIZADOR (solo su número)
+// /decimo/:id ya NO es el panel (antes exponía datos del creador con el id público).
+// Redirige a la verificación pública anónima para enlaces antiguos.
 router.get('/decimo/:id', (req, res) => {
-  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
+  const d = db.prepare('SELECT id FROM decimos WHERE id = ?').get(req.params.id);
   if (!d) return res.status(404).send('Décimo no encontrado');
+  res.redirect(301, `/verificar/${d.id}`);
+});
+
+router.get('/gestion/:token', (req, res) => {
+  const d = db.prepare('SELECT * FROM decimos WHERE organizador_token = ?').get(req.params.token);
+  if (!d) return res.status(404).send('Acceso de gestión no encontrado. Revisa tu enlace privado.');
   const chain = computeChain(db, d.id);
   const agg = resumen(d.id);
   const parts = db.prepare('SELECT id, importe, nombre_participante, access_token, modalidad, importe_aportado, valor_referencia, aceptado_at FROM participaciones WHERE decimo_id = ? ORDER BY created_at ASC').all(d.id);
   const enlaceParticipar = `${base(req)}/participa/${d.id}`;
-  const enlaceGestion = `${base(req)}/decimo/${d.id}`;
+  const enlaceGestion = `${base(req)}/gestion/${d.organizador_token}`;
   const enlaceVerificar = `${base(req)}/verificar/${d.id}`;
   const pct = d.valor_total > 0 ? Math.min(100, (agg.s / d.valor_total) * 100) : 0;
   const saldo = d.valor_total - agg.s;
@@ -423,7 +432,7 @@ ${parts.map((p, i) => {
   return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}<br><span class="muted" style="font-size:11px">${aceptada}</span></td><td>${modLabel}</td><td>${detalle}</td><td>${pctP}%</td>
 <td class="mono"><a href="${linkPart}" target="_blank">abrir</a></td>
 <td><button class="share-btn" onclick="compartir('${linkPart}','${esc(p.nombre_participante) || 'tu'}','${d.id}')">📤</button></td>
-<td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
+<td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}','${d.organizador_token}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
 }).join('')}</table>
 <p class="muted" style="font-size:12px">📤 Compartir copia el enlace del comprobante o lo abre en WhatsApp. 🗑 Solo se puede eliminar la <b>última</b> participación (corrige errores).</p>`
   : '<p class="muted">Aún no hay participaciones.</p>'}
@@ -446,8 +455,8 @@ ${cerrado ? '' : `<div class="card">
 </form>
 </div>`}
 <div class="card" style="text-align:center">
-  <button class="btn" onclick="descargarResumen('${d.id}')">📄 Descargar resumen</button>
-  ${cerrado ? '' : `<button class="btn" style="background:#dc2626" onclick="cerrarReparto('${d.id}')">🔒 Cerrar y sellar el reparto</button>`}
+  <button class="btn" onclick="descargarResumen('${d.id}','${d.organizador_token}')">📄 Descargar resumen</button>
+  ${cerrado ? '' : `<button class="btn" style="background:#dc2626" onclick="cerrarReparto('${d.id}','${d.organizador_token}')">🔒 Cerrar y sellar el reparto</button>`}
 </div>
 </main>
 <script>
@@ -455,10 +464,11 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   ev.preventDefault();
   var form=ev.target, did=form.dataset.decimo;
   var nombre=form.querySelector('[name=nombre]').value;
-  var importe=parseFloat(form.querySelector('[name=importe]').value);
   var modalidad=form.querySelector('input[name=modalidad]:checked').value;
+  var valorCampo=parseFloat(form.querySelector('[name=importe]').value);
   var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando...';
-  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({importe,nombre,modalidad})});
+  var body = modalidad==='gratuita' ? {importe: null, valorReferencia: valorCampo, nombre, modalidad} : {importe: valorCampo, nombre, modalidad};
+  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
   msg.className='msg ok';
@@ -494,9 +504,9 @@ function compartir(link, nombre, did){
     window.open(wa, '_blank');
   }
 }
-async function eliminarUltima(did){
+async function eliminarUltima(did, tok){
   if(!confirm('¿Eliminar la última participación? Esta acción no se puede deshacer. La cadena de integridad se mantiene (solo se quita la última).')) return;
-  var r=await fetch('/decimos/'+did+'/participaciones/ultima',{method:'DELETE'});
+  var r=await fetch('/decimos/'+did+'/participaciones/ultima',{method:'DELETE',headers:{'X-Organizador-Token':tok}});
   var data=await r.json();
   if(!r.ok){alert(data.message||data.error);return;}
   alert('Participación eliminada: '+(data.eliminada.nombre||'Anónimo')+' ('+data.eliminada.importe.toFixed(2)+'€)');
@@ -516,12 +526,12 @@ function descargarRecuperacion(id, enlace){
   a.click();
   alert('Código de recuperación descargado. Guárdalo en lugar seguro.');
 }
-function descargarResumen(did){
-  window.open('/decimo/'+did+'/resumen.txt','_blank');
+function descargarResumen(did, tok){
+  window.open('/gestion/'+tok+'/resumen.txt','_blank');
 }
-async function cerrarReparto(did){
+async function cerrarReparto(did, tok){
   if(!confirm('¿Cerrar y sellar el reparto? No se podrán añadir más participaciones. Esta acción se puede deshacer abriéndolo de nuevo.')) return;
-  var r=await fetch('/decimos/'+did+'/cerrar',{method:'POST'});
+  var r=await fetch('/decimos/'+did+'/cerrar',{method:'POST',headers:{'X-Organizador-Token':tok}});
   var data=await r.json();
   if(!r.ok){alert(data.error||'Error');return;}
   location.reload();
@@ -695,8 +705,9 @@ router.get('/mi-participacion/:token', (req, res) => {
 });
 
 // Resumen descargable del reparto (para el creador)
-router.get('/decimo/:id/resumen.txt', (req, res) => {
-  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
+// Resumen descargable del reparto — SOLO para el creador (valida organizador_token)
+router.get('/gestion/:token/resumen.txt', (req, res) => {
+  const d = db.prepare('SELECT * FROM decimos WHERE organizador_token = ?').get(req.params.token);
   if (!d) return res.status(404).end();
   const chain = computeChain(db, d.id);
   const agg = resumen(d.id);

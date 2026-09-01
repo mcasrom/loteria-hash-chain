@@ -188,3 +188,52 @@ test('aceptación registra auditoría (fecha UTC, IP, UA, hash) y no se puede re
   const n = db.prepare('UPDATE participaciones SET aceptado_at = ? WHERE id = ? AND aceptado_at IS NULL').run('otra', r.participacion.id).changes;
   expect(n).toBe(0);
 });
+
+// ---- SEGURIDAD: panel protegido + retención + FK ----
+
+test('cada décimo tiene un organizador_token de 256 bits único', () => {
+  db.prepare('INSERT INTO decimos (id, organizador_id, organizador_token, numero, serie, sorteo, valor_total, created_at, estado) VALUES (?,?,?,?,?,?,?,?,?)')
+    .run('d2', null, crypto.randomBytes(32).toString('hex'), '11', '22', 'S', 20, new Date().toISOString(), 'abierto');
+  const t1 = db.prepare('SELECT organizador_token FROM decimos WHERE id = ?').get('d2').organizador_token;
+  expect(t1).toMatch(/^[0-9a-f]{64}$/);
+  const t2 = db.prepare('SELECT organizador_token FROM decimos WHERE id = ?').get(decimoId).organizador_token;
+  expect(t1).not.toBe(t2);
+});
+
+test('la anonimización borra datos personales y conserva la cadena', () => {
+  addParticipacion(db, { decimoId, importe: 10, nombre: 'Ana' });
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Luis' });
+  expect(validateChain(db, decimoId)).toBe(true);
+  const { anonimizarDecimo } = require('../src/lib/retencion');
+  const n = anonimizarDecimo(db, decimoId);
+  expect(n).toBe(2);
+  const rows = db.prepare('SELECT nombre_participante, access_token, importe FROM participaciones WHERE decimo_id = ?').all(decimoId);
+  for (const r of rows) {
+    expect(r.nombre_participante).toBeNull();
+    expect(r.access_token).toMatch(/^anon-/); // placeholder no identificable
+    expect(r.importe).toBeGreaterThan(0); // los importes se conservan para agregados
+  }
+  // la cadena sigue siendo íntegra (los hashes no cambian: el hash usa importe)
+  expect(validateChain(db, decimoId)).toBe(true);
+});
+
+test('la retención anonimiza repartos cerrados vencidos', () => {
+  const { aplicarRetencion } = require('../src/lib/retencion');
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Viejo' });
+  db.prepare('UPDATE decimos SET estado = ? WHERE id = ?').run('cerrado', decimoId);
+  // created_at viejo (hace 13 meses)
+  db.prepare('UPDATE decimos SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 13 * 30 * 24 * 60 * 60 * 1000).toISOString(), decimoId);
+  const r = aplicarRetencion(db, Date.now());
+  expect(r.anonimizados).toBe(1);
+  const row = db.prepare('SELECT access_token FROM participaciones WHERE decimo_id = ?').get(decimoId);
+  expect(row.access_token).toMatch(/^anon-/);
+});
+
+test('la retención NO toca repartos recientes', () => {
+  const { aplicarRetencion } = require('../src/lib/retencion');
+  addParticipacion(db, { decimoId, importe: 5, nombre: 'Nuevo' });
+  const r = aplicarRetencion(db, Date.now());
+  expect(r.anonimizados).toBe(0);
+  const row = db.prepare('SELECT access_token FROM participaciones WHERE decimo_id = ?').get(decimoId);
+  expect(row.access_token).not.toBeNull();
+});

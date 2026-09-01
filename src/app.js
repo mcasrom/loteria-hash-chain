@@ -99,9 +99,23 @@ app.post('/mi-participacion/:token/aceptar', (req, res) => {
   res.json({ ok: true, aceptado_at: ahora });
 });
 
+// Validar que el organizador_token es correcto para el décimo.
+function validarOrganizador(req, res) {
+  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
+  if (!d) return null;
+  const tok = (req.get('x-organizador-token') || '').trim();
+  if (!tok || d.organizador_token !== tok) {
+    res.status(403).json({ error: 'no_autorizado', message: 'Token de gestión incorrecto.' });
+    return null;
+  }
+  return d;
+}
+
 // Eliminar la ÚLTIMA participación de un sorteo (corregir error del organizador).
-// Solo se puede eliminar la última de la cadena (no rompe los hashes).
+// Solo el organizador (token) puede eliminarla. No rompe los hashes.
 app.delete('/decimos/:id/participaciones/ultima', (req, res) => {
+  const d = validarOrganizador(req, res);
+  if (!d) return;
   const r = eliminarUltimaParticipacion(db, req.params.id);
   if (!r.ok) return res.status(400).json({ error: r.error, message: r.error });
   // borrar imagen y PDF generados de esa participación
@@ -115,16 +129,16 @@ app.delete('/decimos/:id/participaciones/ultima', (req, res) => {
   res.json({ ok: true, eliminada: r.participacion });
 });
 
-// Abrir / cerrar un reparto (estado operativo)
+// Abrir / cerrar un reparto (solo el organizador con token)
 app.post('/decimos/:id/cerrar', (req, res) => {
-  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
-  if (!d) return res.status(404).json({ error: 'reparto_no_existe' });
+  const d = validarOrganizador(req, res);
+  if (!d) return;
   db.prepare('UPDATE decimos SET estado = ? WHERE id = ?').run('cerrado', req.params.id);
   res.json({ ok: true, estado: 'cerrado' });
 });
 app.post('/decimos/:id/abrir', (req, res) => {
-  const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
-  if (!d) return res.status(404).json({ error: 'reparto_no_existe' });
+  const d = validarOrganizador(req, res);
+  if (!d) return;
   db.prepare('UPDATE decimos SET estado = ? WHERE id = ?').run('abierto', req.params.id);
   res.json({ ok: true, estado: 'abierto' });
 });
@@ -135,6 +149,18 @@ app.get('/decimos/:id/verificar-api', (req, res) => {
   if (!decimo) return res.status(404).json({ error: 'decimo_no_existe' });
   const { ok, participaciones, n } = computeChain(db, req.params.id);
   res.json({ ok, integro: ok, n, participaciones });
+});
+
+// Política de retención: anonimiza repartos vencidos (ejecutar por cron).
+// Protegido por ADMIN_TOKEN para que no sea invocable públicamente.
+app.post('/admin/retencion', (req, res) => {
+  const tok = (req.get('x-admin-token') || '').trim();
+  if (!process.env.ADMIN_TOKEN || tok !== process.env.ADMIN_TOKEN) {
+    return res.status(403).json({ error: 'no_autorizado' });
+  }
+  const { aplicarRetencion } = require('./lib/retencion');
+  const r = aplicarRetencion(db);
+  res.json({ ok: true, ...r, retencion_meses: require('./lib/retencion').RETENCION_MESES });
 });
 
 // Solo arranca si se ejecuta directamente

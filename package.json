@@ -1,0 +1,21 @@
+{
+  "name": "loteria-hash-chain",
+  "version": "1.0.0",
+  "description": "Décimo de Lotería de Navidad en participaciones con cadena de hashes verificable",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "seed": "node scripts/seed.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "express": "^4.19.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}

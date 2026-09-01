@@ -8,11 +8,13 @@ privado** con QR y PDF.
 > La herramienta **no crea sorteos, no vende boletos, no custodia dinero y no
 > garantiza resultados**: documenta el acuerdo entre las personas participantes.
 
-## Dominio candidato
+## Despliegue
 
-Este proyecto está preparado para desplegarse en **`pruebapublica.com`**.
-El `og:image` de la landing apunta a `https://pruebapublica.com/assets/og-preview.png`
-(ajustar el host al desplegar).
+Producción: **`https://loteria-hash.pruebapublica.com`** (subdominio del dominio `pruebapublica.com`).
+
+- El dominio raíz `https://pruebapublica.com` es una landing-vitrina de microservicios
+  (repo `mcasrom/pruebapublica-landing`) que enlaza a esta app.
+- El `og:image` se genera dinámicamente con el host del request (https vía `trust proxy`).
 
 ## Qué incluye
 
@@ -93,7 +95,7 @@ tests/chain.test.js      # 10 tests
 | `PORT` | 3005 | 3005 |
 | `DB_PATH` | `./data/loteria.db` | `/data/loteria.db` |
 | `SELLO_KEY` | clave local | clave secreta (env) |
-| `BASE_URL` | `http://localhost:3005` | `https://pruebapublica.com` |
+| `BASE_URL` | `http://localhost:3005` | `https://loteria-hash.pruebapublica.com` |
 
 ```bash
 git clone https://github.com/mcasrom/loteria-hash-chain.git

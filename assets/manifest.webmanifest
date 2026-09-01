@@ -1,0 +1,16 @@
+{
+  "name": "Registro verificable de participaciones",
+  "short_name": "Participaciones",
+  "description": "Deja constancia de quién participa en un sorteo, boleto o reparto compartido. Cada partícipe recibe un comprobante privado con QR y PDF.",
+  "lang": "es",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

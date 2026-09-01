@@ -83,12 +83,19 @@ router.get('/', (req, res) => {
 <title>Registro verificable de participaciones</title>
 <meta name="description" content="Deja constancia de quién participa en un sorteo, boleto o reparto compartido, cuánto aporta y qué porcentaje le corresponde. Cada partícipe recibe un comprobante privado con QR y PDF.">
 <meta property="og:title" content="Registro verificable de participaciones">
-<meta property="og:description" content="Comparte un boleto. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
+<meta property="og:description" content="Comparte una participación en un sorteo. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
 <meta property="og:image" content="https://pruebapublica.com/assets/og-preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="manifest" href="/assets/manifest.webmanifest">
+<meta name="theme-color" content="#0a0f1e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Participaciones">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
 <style>
 :root{--bg:#070b18;--bg2:#0d1528;--card:#101b33;--card2:#0a1226;--line:#1c2a47;--line2:#26365a;
 --fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171;
@@ -171,7 +178,7 @@ footer a{color:var(--accent);text-decoration:none}
 
 <header class="hero">
   <span class="badge">Registro privado y verificable</span>
-  <h1>Comparte un boleto. Deja el reparto por escrito.</h1>
+  <h1>Comparte una participación. Deja el reparto por escrito.</h1>
   <p>Si ya tienes un décimo, una rifa, una apuesta o un bote compartido, registra quién participa, cuánto aporta y qué porcentaje del reparto le corresponde. Cada partícipe recibe un <b>comprobante privado</b> con QR y PDF.</p>
   <p class="resp">La herramienta no crea sorteos, no vende boletos, no custodia dinero y no garantiza resultados: documenta el acuerdo entre las personas participantes.</p>
   <div class="sub-badges"><span>🔗 Registro verificable</span><span>🔒 Comprobantes privados</span><span>📄 PDF de constancia</span><span>📱 Fácil de compartir</span></div>
@@ -287,6 +294,10 @@ footer a{color:var(--accent);text-decoration:none}
     apply(cur);
     try { localStorage.setItem('tema', cur); } catch(e){}
   };
+})();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('/assets/sw.js'); });
+}
 </script>
 </body></html>`);
 });

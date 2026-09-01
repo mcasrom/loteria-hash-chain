@@ -76,10 +76,10 @@ a{color:#60a5fa}
 router.get('/', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Registra participaciones de tu sorteo con comprobante</title>
-<meta name="description" content="Organiza participaciones de cualquier sorteo, rifa o décimo. Cada persona aporta su parte y recibe su comprobante con QR. Con integridad y privacidad.">
-<meta property="og:title" content="Participaciones de sorteos con comprobante">
-<meta property="og:description" content="Registra las participaciones de tu sorteo. Cada partícipe recibe su comprobante con QR. Integro y privado.">
+<title>Registro verificable de participaciones</title>
+<meta name="description" content="Deja constancia de quién participa en un sorteo, boleto o reparto compartido, cuánto aporta y qué porcentaje le corresponde. Cada partícipe recibe un comprobante privado con QR y PDF.">
+<meta property="og:title" content="Registro verificable de participaciones">
+<meta property="og:description" content="Comparte un boleto. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
 <style>
 :root{--bg:#070b18;--bg2:#0d1528;--card:#101b33;--card2:#0a1226;--line:#1c2a47;--line2:#26365a;
 --fg:#e8eefb;--mut:#8ba0c4;--accent:#f59e0b;--accent2:#3b82f6;--ok:#34d399;--warn:#fbbf24;--danger:#f87171;
@@ -92,32 +92,31 @@ html{scroll-behavior:smooth}
 body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(1000px 600px at 85% -5%,rgba(245,158,11,.10),transparent),
 radial-gradient(800px 500px at 0% 0%,rgba(59,130,246,.10),transparent),var(--bg);color:var(--fg);margin:0;line-height:1.65}
 .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
-/* TEMA */
-.theme-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center;margin-left:14px;transition:background .2s}
+.theme-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center;margin-left:14px}
 .theme-btn:hover{background:var(--bg2)}
-/* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
 .nav-links{display:flex;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
 .brand .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#fb923c);display:flex;align-items:center;justify-content:center;font-size:18px}
 nav a{color:var(--mut);text-decoration:none;font-size:14px;margin-left:22px}
 nav a:hover{color:var(--fg)}
-/* HERO */
-.hero{text-align:center;padding:64px 0 48px}
+.hero{text-align:center;padding:60px 0 44px}
 .hero .badge{display:inline-block;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--ok);font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:30px;margin-bottom:18px}
-.hero h1{font-size:40px;line-height:1.18;margin:0 0 16px;text-wrap:balance;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:18px;color:var(--mut);max-width:620px;margin:0 auto}
+.hero h1{font-size:42px;line-height:1.18;margin:0 0 16px;text-wrap:balance;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:18px;color:var(--mut);max-width:640px;margin:0 auto}
+.hero .resp{font-size:14px;color:var(--mut);max-width:620px;margin:14px auto 0;font-style:italic}
 .hero .sub-badges{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero .sub-badges span{font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 14px}
-.cta{display:inline-block;margin-top:30px;background:linear-gradient(90deg,var(--accent2),#60a5fa);color:#fff;padding:16px 36px;border-radius:12px;font-weight:800;font-size:17px;text-decoration:none;box-shadow:0 12px 34px rgba(59,130,246,.4)}
-.cta:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(59,130,246,.5)}
-/* SECCIONES */
-section{padding:56px 0}
+.cta-row{margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cta{display:inline-block;background:linear-gradient(90deg,var(--accent2),#60a5fa);color:#fff;padding:16px 32px;border-radius:12px;font-weight:800;font-size:16px;text-decoration:none;box-shadow:0 12px 34px rgba(59,130,246,.4)}
+.cta:hover{transform:translateY(-2px)}
+.cta2{display:inline-block;background:var(--card);color:var(--fg);border:1px solid var(--line2);padding:16px 32px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none}
+.cta2:hover{border-color:var(--accent)}
+section{padding:52px 0}
 .sec-tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800;margin:0 0 8px}
 h2.sec{font-size:30px;margin:0 0 8px}
 .sec-sub{color:var(--mut);font-size:15px;margin:0 0 30px}
-/* FORM */
-.form-shell{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:20px;padding:34px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.form-shell{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:20px;padding:34px;box-shadow:0 20px 60px var(--shadow)}
 .form-shell h3{margin:0 0 6px;font-size:22px}
 .form-shell .hint{color:var(--mut);font-size:14px;margin:0 0 22px}
 .grid2{display:grid;gap:14px;grid-template-columns:1fr 1fr}
@@ -126,20 +125,17 @@ input:focus{border-color:var(--accent2)}
 .btn-big{width:100%;margin-top:18px;background:linear-gradient(90deg,var(--accent2),#60a5fa);color:#fff;border:none;padding:16px;border-radius:12px;font-weight:800;font-size:17px;cursor:pointer}
 .btn-big:hover{filter:brightness(1.1)}
 .form-shell .mini{color:var(--mut);font-size:12.5px;margin:14px 0 0;text-align:center}
-/* PASOS */
 .steps{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;position:relative}
 .step .n{position:absolute;top:18px;right:20px;font-size:40px;font-weight:800;color:rgba(255,255,255,.05)}
 .step .ic{width:48px;height:48px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
 .step b{font-size:17px;display:block;margin-bottom:6px}
 .step p{color:var(--mut);font-size:14px;margin:0}
-/* FEATURES */
 .feats{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .feat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;gap:14px;align-items:flex-start}
 .feat .ic{font-size:24px;flex-shrink:0}
 .feat b{display:block;font-size:16px;margin-bottom:4px}
 .feat p{color:var(--mut);font-size:13.5px;margin:0}
-/* MOCK */
 .mock-wrap{display:grid;gap:24px;grid-template-columns:1.1fr .9fr;align-items:center}
 @media(max-width:800px){.mock-wrap{grid-template-columns:1fr}}
 .mock{background:linear-gradient(150deg,var(--bg2),var(--card));border:1px solid var(--line2);border-radius:18px;padding:24px;max-width:340px}
@@ -153,126 +149,115 @@ input:focus{border-color:var(--accent2)}
 .mock-cap{color:var(--mut);font-size:13px;line-height:1.7}
 .mock-cap b{color:var(--fg)}
 .mock-cap ul{padding-left:18px;margin:12px 0 0}
-/* FAQ */
-.faq details{border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:10px;background:var(--card)}
-.faq summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--fg)}
-.faq details p{color:var(--mut);font-size:14px;margin:12px 0 0}
-/* FOOTER */
 footer{border-top:1px solid var(--line);margin-top:40px;padding:34px 0 50px;text-align:center;color:var(--mut);font-size:13px}
 footer a{color:var(--accent);text-decoration:none}
 </style></head><body>
 <div class="wrap">
 <nav>
-  <div class="brand"><div class="logo">✓</div> Registro de participaciones</div>
-  <div class="nav-links"><a href="#registrar">Registrar</a><a href="#como">Cómo funciona</a><a href="#metodo">Metodología</a>
+  <div class="brand"><div class="logo">✓</div> Registro verificable de participaciones</div>
+  <div class="nav-links"><a href="#registrar">Registrar participaciones</a><a href="#como">Cómo funciona</a><a href="#confianza">Seguridad y privacidad</a>
     <button class="theme-btn" onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button>
   </div>
 </nav>
 
 <header class="hero">
-  <span class="badge">✓ Confirma participaciones · ✓ Verifica tu participación · ✓ Privado</span>
-  <h1>Registra las participaciones de tu sorteo</h1>
-  <p>Tu sorteo ya existe (un décimo, una rifa, un evento). Aquí se registran las <b>participaciones</b>: quién participa, con cuánto y qué le corresponde si toca. Cada partícipe recibe un <b>comprobante verificable</b>. No creamos sorteos: documentamos quién participa en el tuyo.</p>
-  <div class="sub-badges"><span>🔗 Integridad de los registros</span><span>🔒 Comprobante privado</span><span>📄 PDF legal</span><span>📱 Listo para WhatsApp</span></div>
-  <a class="cta" href="#registrar">🎟️ Registrar participaciones</a>
+  <span class="badge">Registro privado y verificable</span>
+  <h1>Comparte un boleto. Deja el reparto por escrito.</h1>
+  <p>Si ya tienes un décimo, una rifa, una apuesta o un bote compartido, registra quién participa, cuánto aporta y qué porcentaje del reparto le corresponde. Cada partícipe recibe un <b>comprobante privado</b> con QR y PDF.</p>
+  <p class="resp">La herramienta no crea sorteos, no vende boletos, no custodia dinero y no garantiza resultados: documenta el acuerdo entre las personas participantes.</p>
+  <div class="sub-badges"><span>🔗 Registro verificable</span><span>🔒 Comprobantes privados</span><span>📄 PDF de constancia</span><span>📱 Fácil de compartir</span></div>
+  <div class="cta-row">
+    <a class="cta" href="#registrar">🎟️ Crear registro de participaciones</a>
+    <a class="cta2" href="#como">Ver un ejemplo</a>
+  </div>
 </header>
 
-<section id="crear">
+<section id="registrar">
   <div class="form-shell">
-    <h3>🎟️ Registra las participaciones de tu sorteo</h3>
-    <p class="hint">Pon los datos de TU sorteo (no lo creamos, solo lo documentamos). El resto lo hace la herramienta.</p>
+    <h3>🎟️ Registra un sorteo o reparto compartido</h3>
+    <p class="hint">Añade los datos del boleto, rifa o reparto que ya existe. Después invita a las personas participantes.</p>
     <form method="POST" action="/decimos">
       <div class="grid2">
         <input name="numero" placeholder="Número (si lo hay, ej. 85432)">
         <input name="serie" placeholder="Serie (si lo hay)">
-        <input name="sorteo" placeholder="Nombre de tu sorteo (ej. Décimo de Navidad)" value="Sorteo compartido">
-        <input name="valor_total" type="number" step="0.01" min="1" value="20" placeholder="Valor total €" required>
+        <input name="sorteo" placeholder="Nombre del sorteo o reparto" value="Sorteo compartido">
+        <input name="valor_total" type="number" step="0.01" min="1" value="20" placeholder="Importe de referencia €" required>
       </div>
-      <button class="btn-big">🎟️ Empezar a registrar participaciones</button>
+      <button class="btn-big">🎟️ Crear el registro de participaciones</button>
     </form>
-    <p class="mini">Al empezar obtienes un enlace privado de gestión. Cada partícipe aporta su parte y recibe su comprobante; nadie ve lo que ponen los demás.</p>
+    <p class="mini">Al crear el registro recibirás un enlace privado de gestión. Cada partícipe tendrá su propio comprobante y no podrá ver los importes de los demás.</p>
   </div>
 </section>
 
 <section id="como">
   <p class="sec-tag">Así de simple</p>
   <h2 class="sec">Tres pasos</h2>
-  <p class="sec-sub">Sin cuentas, sin registros, sin listas raras.</p>
+  <p class="sec-sub">Sin cuentas, sin listas públicas, sin custodiar dinero ni boletos.</p>
   <div class="steps">
-    <div class="step"><span class="n">1</span><div class="ic">🎟️</div><b>Registra tu sorteo</b><p>Introduce el número (si lo hay) y el valor total. Obtienes un panel privado para gestionar sus participaciones.</p></div>
-    <div class="step"><span class="n">2</span><div class="ic">📤</div><b>Comparte el enlace</b><p>Envías el enlace a quien quiera participar. Cada uno aporta su parte, sin ver a los demás.</p></div>
-    <div class="step"><span class="n">3</span><div class="ic">📲</div><b>Entrega comprobantes</b><p>Cada partícipe recibe su imagen con QR y su PDF. Se guardan y se comparten por WhatsApp.</p></div>
+    <div class="step"><span class="n">1</span><div class="ic">🎟️</div><b>Registra el boleto o sorteo</b><p>Introduce el número, la serie y el importe de referencia. Obtienes un panel privado para gestionar el reparto.</p></div>
+    <div class="step"><span class="n">2</span><div class="ic">📤</div><b>Comparte el enlace de participación</b><p>Envías el enlace a las personas que participarán. Cada una registra su aportación sin acceder a la información de las demás.</p></div>
+    <div class="step"><span class="n">3</span><div class="ic">📲</div><b>Entrega los comprobantes</b><p>Cada partícipe recibe una imagen con QR y un PDF privado para guardar o compartir por WhatsApp.</p></div>
   </div>
 </section>
 
 <section>
   <p class="sec-tag">Lo que obtienes</p>
-  <h2 class="sec">El comprobante de cada partícipe</h2>
-  <p class="sec-sub">Imagen + PDF, con QR que abre la verificación pública (anónima).</p>
+  <h2 class="sec">Un comprobante privado para cada partícipe</h2>
+  <p class="sec-sub">Imagen + PDF, con QR para comprobar la integridad del registro.</p>
   <div class="mock-wrap">
     <div class="mock">
       <div class="head"><div class="num">85432</div><div class="serie">serie 021</div></div>
-      <div class="row"><span>Participante</span><b>Ana</b></div>
-      <div class="row"><span>Aportación</span><b>10,00 €</b></div>
-      <div class="row"><span>% del sorteo</span><b>50%</b></div>
-      <div class="row"><span>Estado</span><b style="color:var(--ok)">✓ válido</b></div>
+      <div class="row"><span>Partícipe</span><b>Ana</b></div>
+      <div class="row"><span>Importe aportado</span><b>10,00 €</b></div>
+      <div class="row"><span>Porcentaje de reparto</span><b>50%</b></div>
+      <div class="row"><span>Estado</span><b style="color:var(--ok)">Registro íntegro ✓</b></div>
       <div class="qr">QR</div>
     </div>
     <div class="mock-cap">
       <p style="margin-top:0">Cada comprobante incluye:</p>
       <ul>
-        <li>Número, serie y nombre del sorteo.</li>
-        <li>Tu nombre, tu importe y tu <b>% de participación</b>.</li>
-        <li>Un <b>QR</b> que abre la verificación pública del sorteo.</li>
-        <li>Tu <b>PDF legal</b> con firma del partícipe y del organizador.</li>
-        <li>Un <b>enlace privado</b> solo tuyo (no se vuelve a mostrar a nadie).</li>
+        <li>Número, serie y referencia del sorteo o boleto.</li>
+        <li>Nombre declarado del partícipe e <b>importe aportado</b>.</li>
+        <li><b>Porcentaje de reparto</b> asignado.</li>
+        <li>QR para comprobar la <b>integridad del registro</b> sin revelar datos privados.</li>
+        <li>PDF privado con los datos del acuerdo.</li>
+        <li>Un <b>enlace privado personal</b>. Guárdalo: por seguridad, no se muestra de nuevo.</li>
       </ul>
-      <p style="margin-bottom:0">El enlace del comprobante usa un <b>código secreto de 256 bits</b>: imposible de adivinar, y no existe otra forma de verlo.</p>
+      <p style="margin-bottom:0">El enlace del comprobante está <b>protegido con un token aleatorio de 256 bits</b>, diseñado para impedir la enumeración y los accesos no autorizados.</p>
     </div>
   </div>
 </section>
 
-<section>
+<section id="confianza">
   <p class="sec-tag">Por qué</p>
-  <h2 class="sec">Honestidad y privacidad, por diseño</h2>
-  <p class="sec-sub">Nada de depender de "la palabra del organizador".</p>
+  <h2 class="sec">Un acuerdo claro, privado y verificable</h2>
+  <p class="sec-sub">Menos malentendidos. Más constancia del acuerdo.</p>
   <div class="feats">
-    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada aportación se encadena con un hash. Si alguien toca un importe después, la verificación pública lo detecta y lo marca como alterado.</p></div></div>
-    <div class="feat"><div class="ic">🔒</div><div><b>Comprobante privado</b><p>Cada participante ve solo su parte. No hay listas públicas con nombres e importes.</p></div></div>
-    <div class="feat"><div class="ic">🕵️</div><div><b>Verificación anónima</b><p>La página pública de verificación muestra solo total, saldo y estado. Nunca quién puso cuánto.</p></div></div>
-    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF referencia la comunidad de bienes (Código Civil) y tu % de participación en el sorteo.</p></div></div>
-    <div class="feat"><div class="ic">🛡️</div><div><b>Anti-fuerza bruta</b><p>Accesos a comprobantes con límite por IP y registro. Los intentos de adivinar quedan detectados.</p></div></div>
-    <div class="feat"><div class="ic">🧾</div><div><b>Reparto claro</b><p>Cada partícipe ve su % exacto de participación. Si toca, cada uno sabe lo que le corresponde.</p></div></div>
+    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada registro queda vinculado al anterior mediante hashes. Si se altera un dato registrado, la comprobación de integridad puede detectarlo.</p></div></div>
+    <div class="feat"><div class="ic">🔒</div><div><b>Comprobantes privados</b><p>Cada persona accede solo a su propio comprobante. Los nombres y aportaciones individuales no se publican.</p></div></div>
+    <div class="feat"><div class="ic">🕵️</div><div><b>Verificación sin exponer datos</b><p>El QR permite consultar el estado del registro sin mostrar la identidad ni el importe de cada partícipe.</p></div></div>
+    <div class="feat"><div class="ic">📄</div><div><b>Documento de constancia</b><p>Cada comprobante incluye los datos del acuerdo de participación y reparto, para conservarlos en PDF.</p></div></div>
+    <div class="feat"><div class="ic">🛡️</div><div><b>Acceso protegido</b><p>Los enlaces personales usan tokens aleatorios de alta entropía y el sistema aplica límites frente a intentos repetidos de acceso.</p></div></div>
+    <div class="feat"><div class="ic">🧾</div><div><b>Reparto transparente</b><p>Cada partícipe ve el porcentaje de reparto registrado para su participación.</p></div></div>
   </div>
 </section>
 
-<section id="metodo">
-  <p class="sec-tag">Metodología</p>
-  <h2 class="sec">Cómo funciona por dentro, sin letra pequeña</h2>
-  <p class="sec-sub">Aquí no ocultamos nada. Esto es lo que hace el sistema, qué garantiza y qué no.</p>
-  <div class="feats">
-    <div class="feat"><div class="ic">🔗</div><div><b>Cadena de hashes (SHA-256)</b><p>Cada aportación guarda <code>hash_actual = SHA256(hash_anterior | sorteo | importe | timestamp)</code>. Cada bloque apunta al anterior. Es la misma función hash que usa TLS/Node nativo — no es un sistema inventado ni una blockchain.</p></div></div>
-    <div class="feat"><div class="ic">🛡️</div><div><b>Detección de manipulación</b><p>Si alguien toca un importe en la base de datos, el hash deja de cuadrar con el siguiente y la verificación pública marca el sorteo como ALTERADO. Está demostrado por un test automatizado que cambia un importe y comprueba que se rompe.</p></div></div>
-    <div class="feat"><div class="ic">🔒</div><div><b>Comprobante por token secreto</b><p>Cada partícipe accede a su comprobante con un código de 256 bits generado al azar. No se puede adivinar ni enumerar. El identificador interno de la base de datos nunca se expone en una URL pública.</p></div></div>
-    <div class="feat"><div class="ic">🕵️</div><div><b>Privacidad por diseño</b><p>El partícipe ve solo su comprobante. La verificación pública muestra únicamente total, saldo y estado de la cadena — nunca nombres ni importes individuales. Solo el organizador ve a los partícipes de SU sorteo.</p></div></div>
-    <div class="feat"><div class="ic">📄</div><div><b>Documento con base legal</b><p>El PDF incluye tu nombre, tu aportación, tu % de participación y referencia a la comunidad de bienes (Código Civil), con firma del partícipe y del organizador.</p></div></div>
-    <div class="feat"><div class="ic">🛡️</div><div><b>Anti-fuerza bruta</b><p>Accesos a comprobantes con límite por IP (20 intentos fallidos / 10 min) y registro en log. Un intento de adivinar tokens queda detectado.</p></div></div>
-  </div>
-</section>
-
-<section id="honestidad" style="padding-top:0">
+<section>
   <p class="sec-tag">Transparencia</p>
-  <h2 class="sec">Qué garantiza esto — y qué no</h2>
+  <h2 class="sec">Qué hace esto — y qué no</h2>
   <div class="feats" style="grid-template-columns:1fr 1fr">
-    <div class="feat" style="border-color:rgba(52,211,153,.3)"><div class="ic">✅</div><div><b>Garantiza</b><p style="margin-bottom:4px">· Que los importes registrados no se alteran después de emitirse (hash encadenado).<br>· Que cada comprobante es privado y solo accesible con su token.<br>· Que cada partícipe tiene su % exacto de participación por escrito.</p></div></div>
-    <div class="feat" style="border-color:rgba(248,113,113,.3)"><div class="ic">⚠️</div><div><b>No garantiza</b><p style="margin-bottom:0">· Que el boleto o décimo físico exista: eso depende del organizador, que es quien lo deposita.<br>· La identidad real de los partícipes (se registra el nombre que se declara).<br>· Que sea una blockchain descentralizada: es una base SQLite con hashes, suficiente para este uso.</p></div></div>
+    <div class="feat" style="border-color:rgba(52,211,153,.3)"><div class="ic">✅</div><div><b>Registra</b><p style="margin-bottom:4px">· Quién participa y cuánto aporta cada persona.<br>· Qué porcentaje del reparto corresponde a cada partícipe.<br>· Que los importes registrados no se alteran después de emitirse (hash encadenado).</p></div></div>
+    <div class="feat" style="border-color:rgba(248,113,113,.3)"><div class="ic">⚠️</div><div><b>No verifica</b><p style="margin-bottom:0">· La existencia, validez o custodia del boleto: eso es responsabilidad de quien lo guarda.<br>· La identidad real de las personas (se registra el nombre que se declara).<br>· El resultado oficial del sorteo ni el pago de premios.</p></div></div>
   </div>
+  <p class="sec-sub" style="margin-top:18px;font-size:13px;font-style:italic;text-align:center">
+    El comprobante documenta el acuerdo declarado entre las personas participantes. Su valor probatorio dependerá de las circunstancias, de la información aportada y de la normativa aplicable.
+  </p>
 </section>
 
 <footer>
-  <b>Participaciones de sorteos con comprobante</b> · Cualquier evento: sorteos, rifas, apuestas, solidario<br>
-  <a href="#crear">Registrar participaciones</a> · <a href="#metodo">Metodología</a> · <a href="mailto:info@viajeinteligencia.com">info@viajeinteligencia.com</a><br>
-  <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Open source · Los servidores los paga su autor</span>
+  <b>Registro verificable de participaciones</b> · Para décimos, rifas, botes, apuestas y repartos compartidos<br>
+  <a href="#registrar">Crear un registro</a> · <a href="#como">Cómo funciona</a> · <a href="#confianza">Privacidad y seguridad</a> · <a href="mailto:info@viajeinteligencia.com">info@viajeinteligencia.com</a><br>
+  <span style="font-size:11.5px;opacity:.75">versión 0.2.0 · Proyecto independiente y de código abierto</span>
 </footer>
 </div>
 <script>
@@ -327,7 +312,7 @@ router.get('/decimo/:id', (req, res) => {
 <p class="muted"><a href="/">← Registrar otro sorteo</a></p>
 <div class="card">
   <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1 style="margin:0">Décimo ${esc(d.numero)} · ${esc(d.serie)}</h1>
+    <div><h1 style="margin:0">Registro ${esc(d.numero)} · ${esc(d.serie)}</h1>
     <p class="muted">${esc(d.sorteo)} · Panel <b>solo tuyo</b>: ves tu número y a quien participa.</p></div>
     <span class="badge ${chain.ok ? 'ok' : 'bad'}">${chain.ok ? 'ÍNTEGRA ✓' : 'ALTERADA ✗'}</span>
   </div>
@@ -419,10 +404,10 @@ router.get('/participa/:decimoId', (req, res) => {
   const pct = d.valor_total > 0 ? Math.min(100, (agg.s / d.valor_total) * 100) : 0;
 
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Participa en el décimo ${d.numero}</title>${css}</head><body>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Participa en ${d.numero} (sorteo compartido)</title>${css}</head><body>
 <main>
 <div class="card">
-  <h1>🎟️ Participa en el décimo ${esc(d.numero)} · ${esc(d.serie)}</h1>
+  <h1>🎟️ Participa en ${esc(d.numero)} · ${esc(d.serie)}</h1>
   <p class="muted">${esc(d.sorteo)}</p>
   <div class="kpis">
     <div class="kpi"><b>${d.valor_total.toFixed(2)}€</b><span>total</span></div>
@@ -478,14 +463,14 @@ router.get('/mi-participacion/:token', (req, res) => {
   const pct = d.valor_total > 0 ? ((p.importe / d.valor_total) * 100).toFixed(2) : '0';
 
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Tu participación · Décimo ${d.numero}</title>${css}</head><body>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Tu comprobante · ${d.numero}</title>${css}</head><body>
 <main>
 <div class="card">
   <span class="badge ${chain.ok ? 'ok' : 'bad'}" style="margin-bottom:10px">Cadena del décimo: ${chain.ok ? 'ÍNTEGRA ✓' : 'ALTERADA ✗'}</span>
   <h1 style="margin:10px 0 4px">Tu participación</h1>
   <p class="muted">Comprobante personal. Solo quien tenga este enlace lo ve.</p>
   <div class="kpis">
-    <div class="kpi"><b>Décimo ${esc(d.numero)}</b><span>serie ${esc(d.serie)}</span></div>
+    <div class="kpi"><b>${esc(d.numero)}</b><span>serie ${esc(d.serie)}</span></div>
     <div class="kpi"><b>${p.importe.toFixed(2)}€</b><span>tu aportación</span></div>
     <div class="kpi"><b>${pct}%</b><span>de participación</span></div>
     <div class="kpi"><b>${esc(p.nombre_participante) || 'Anónimo'}</b><span>partícipe</span></div>

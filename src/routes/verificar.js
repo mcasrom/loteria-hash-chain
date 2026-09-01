@@ -10,7 +10,7 @@ const db = openDb();
 
 router.get('/:id', (req, res) => {
   const decimo = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);
-  if (!decimo) return res.status(404).send('<h1>Décimo no encontrado</h1>');
+  if (!decimo) return res.status(404).send('<h1>Comprobante no encontrado</h1>');
 
   const chain = computeChain(db, decimo.id);
   const agg = db.prepare('SELECT COUNT(*) c, COALESCE(SUM(importe),0) s FROM participaciones WHERE decimo_id = ?').get(decimo.id);
@@ -24,7 +24,7 @@ router.get('/:id', (req, res) => {
   const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Verificación del décimo ${decimo.numero} · ${decimo.sorteo}</title>
+<title>Comprobar comprobante ${decimo.numero} · ${decimo.sorteo}</title>
 <meta name="description" content="Décimo ${decimo.numero} serie ${decimo.serie}: ${agg.c} participaciones, ${emitido.toFixed(2)}€ de ${decimo.valor_total.toFixed(2)}€ emitidos, cadena ${chain.ok ? 'ÍNTEGRA' : 'ALTERADA'}.">
 <meta property="og:title" content="Décimo ${decimo.numero} · ${decimo.sorteo}">
 <meta property="og:description" content="${agg.c} participaciones · ${emitido.toFixed(2)}€ / ${decimo.valor_total.toFixed(2)}€ · cadena ${chain.ok ? 'íntegra ✓' : '¡alterada!'}">
@@ -43,7 +43,7 @@ main{max-width:620px;margin:0 auto}
 .kpi b{font-size:16px}
 </style></head><body>
 <main>
-<h1>🎄 Verificación del décimo</h1>
+<h1>🔍 Comprobar un comprobante</h1>
 <div class="card">
 <p><b>Número:</b> ${decimo.numero} · <b>Serie:</b> ${decimo.serie}</p>
 <p><b>Sorteo:</b> ${decimo.sorteo}</p>
@@ -65,7 +65,7 @@ ${chain.ok ? '' : '<div class="card" style="border-color:#dc2626"><p style="colo
   res.send(html);
 });
 
-// Imagen OG dinámica (una por décimo, con número e importe emitido — sin nombres)
+// Imagen OG dinámica (una por registro, con número e importe registrado — sin nombres)
 const { generarImagenOg } = require('../lib/og');
 router.get('/og/participacion/:id', (req, res) => {
   try {

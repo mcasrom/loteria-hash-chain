@@ -6,6 +6,9 @@ const { addParticipacion, computeChain, eliminarUltimaParticipacion } = require(
 const crypto = require('crypto');
 
 const app = express();
+// Confiar en el proxy (nginx/Cloudflare) para X-Forwarded-Proto, así
+// req.protocol devuelve https y los enlaces OG/QR se generan con https.
+app.set('trust proxy', true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

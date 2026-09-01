@@ -16,7 +16,7 @@ router.get('/:id', (req, res) => {
   const agg = db.prepare('SELECT COUNT(*) c, COALESCE(SUM(importe),0) s FROM participaciones WHERE decimo_id = ?').get(decimo.id);
   const emitido = agg.s;
   const saldo = decimo.valor_total - emitido;
-  const rotaEn = chain.participaciones.find((p) => !p);
+  // No exponer ids internos: la cadena rota se indica sin revelar el id de la participación.
 
   const base = `${req.protocol}://${req.get('host')}`;
   const ogImage = `${base}/verificar/og/participacion/${decimo.id}`;

@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS participaciones (
   nombre_participante TEXT NULL,
   hash_anterior TEXT NOT NULL,
   hash_actual TEXT NOT NULL,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  access_token TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS usuarios (

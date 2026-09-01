@@ -106,14 +106,15 @@ function addParticipacion(db, { decimoId, importe, nombre = null }) {
   }
 
   const id = crypto.randomUUID();
+  const access_token = crypto.randomBytes(32).toString('hex'); // 256 bits, secreto del partícipe
   const created_at = new Date().toISOString();
   const hash_actual = hashBlock(prevHash, decimoId, importe, created_at);
 
   db.prepare(
-    'INSERT INTO participaciones (id, decimo_id, importe, nombre_participante, hash_anterior, hash_actual, created_at) VALUES (?,?,?,?,?,?,?)'
-  ).run(id, decimoId, importe, nombre, prevHash, hash_actual, created_at);
+    'INSERT INTO participaciones (id, decimo_id, importe, nombre_participante, hash_anterior, hash_actual, created_at, access_token) VALUES (?,?,?,?,?,?,?,?)'
+  ).run(id, decimoId, importe, nombre, prevHash, hash_actual, created_at, access_token);
 
-  return { ok: true, participacion: { id, decimo_id: decimoId, importe, hash_anterior: prevHash, hash_actual, created_at } };
+  return { ok: true, participacion: { id, decimo_id: decimoId, importe, hash_anterior: prevHash, hash_actual, created_at, access_token } };
 }
 
 module.exports = { hashBlock, GENESIS, computeChain, validateChain, addParticipacion };

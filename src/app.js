@@ -7,6 +7,7 @@ const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const db = openDb();
 
@@ -16,17 +17,8 @@ const verificarRouter = require('./routes/verificar');
 app.use('/', viewRouter);
 app.use('/verificar', verificarRouter);
 
-// Crear un décimo
-app.post('/decimos', (req, res) => {
-  const { numero, serie, sorteo, valor_total } = req.body || {};
-  if (!numero || !sorteo || typeof valor_total !== 'number') {
-    return res.status(400).json({ error: 'numero_sorteo_valor_requeridos' });
-  }
-  const id = crypto.randomUUID();
-  db.prepare('INSERT INTO decimos (id, organizador_id, numero, serie, sorteo, valor_total, created_at) VALUES (?,?,?,?,?,?,?)')
-    .run(id, null, numero, serie || '', sorteo, valor_total, new Date().toISOString());
-  res.json({ ok: true, id, numero, serie: serie || '', sorteo, valor_total });
-});
+// Crear un décimo se maneja en routes/view.js (POST /decimos -> redirect al panel)
+// Este endpoint POST duplicado se elimina para evitar conflicto de rutas.
 
 // Añadir participación (con validación de cadena y de valor_total)
 app.post('/decimos/:id/participaciones', async (req, res) => {
@@ -51,7 +43,17 @@ app.post('/decimos/:id/participaciones', async (req, res) => {
       sorteo: decimo.sorteo, importe, nombre, valorTotal: decimo.valor_total, decimoId: decimo.id,
     });
   } catch (e) { console.error('pdf err:', e.message); }
-  res.status(201).json({ ok: true, participacion: r.participacion, imagen, pdf });
+  // Responder SOLO el access_token (secreto del partícipe) + rutas de descarga.
+  // NUNCA el participacion_id interno.
+  res.status(201).json({
+    ok: true,
+    access_token: r.participacion.access_token,
+    importe: r.participacion.importe,
+    nombre: nombre || null,
+    comprobante: `/mi-participacion/${r.participacion.access_token}`,
+    imagen: imagen || null,
+    pdf: pdf || null,
+  });
 });
 
 // Verificar integridad

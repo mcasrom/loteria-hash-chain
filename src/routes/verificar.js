@@ -43,6 +43,7 @@ main{max-width:620px;margin:0 auto}
 .kpi b{font-size:16px}
 </style></head><body>
 <main>
+<p style="font-size:13px"><a href="javascript:history.back()">← Volver</a> · <a href="/" style="color:#2563eb">🏠 Inicio</a></p>
 <h1>🔍 Comprobar un comprobante</h1>
 <div class="card">
 <p><b>Número:</b> ${decimo.numero} · <b>Serie:</b> ${decimo.serie}</p>

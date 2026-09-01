@@ -313,7 +313,7 @@ router.get('/decimo/:id', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Décimo ${d.numero} · gestión</title>${css}</head><body>
 <main>
-<p class="muted"><a href="/">← Registrar otro sorteo</a></p>
+<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a> · <a href="/">← Registrar otro sorteo</a></p>
 <div class="card">
   <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
     <div><h1 style="margin:0">Registro ${esc(d.numero)} · ${esc(d.serie)}</h1>
@@ -331,11 +331,12 @@ router.get('/decimo/:id', (req, res) => {
 </div>
 <div class="card">
 <h2>Participaciones de TU décimo (${parts.length})</h2>
-${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>Comprobante</th><th>Compartir</th><th></th></tr>
+${parts.length ? `<table><tr><th>Partícipe</th><th>Importe</th><th>% reparto</th><th>Comprobante</th><th>Compartir</th><th></th></tr>
 ${parts.map((p, i) => {
   const esUltima = i === parts.length - 1;
   const linkPart = `${base(req)}/mi-participacion/${p.access_token}`;
-  return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}</td><td>${p.importe.toFixed(2)}€</td>
+  const pctP = d.valor_total > 0 ? ((p.importe / d.valor_total) * 100).toFixed(2) : '0';
+  return `<tr><td>${esc(p.nombre_participante) || 'Anónimo'}</td><td>${p.importe.toFixed(2)}€</td><td>${pctP}%</td>
 <td class="mono"><a href="${linkPart}" target="_blank">abrir</a></td>
 <td><button class="share-btn" onclick="compartir('${linkPart}','${esc(p.nombre_participante) || 'tu'}','${d.id}')">📤</button></td>
 <td>${esUltima ? `<button class="del-btn" onclick="eliminarUltima('${d.id}')" title="Eliminar la última participación (si hubo un error)">🗑</button>` : ''}</td></tr>`;
@@ -421,6 +422,7 @@ router.get('/participa/:decimoId', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Participa en ${d.numero} (sorteo compartido)</title>${css}</head><body>
 <main>
+<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a></p>
 <div class="card">
   <h1>🎟️ Participa en ${esc(d.numero)} · ${esc(d.serie)}</h1>
   <p class="muted">${esc(d.sorteo)}</p>
@@ -491,6 +493,7 @@ router.get('/mi-participacion/:token', (req, res) => {
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Tu comprobante · ${d.numero}</title>${css}</head><body>
 <main>
+<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a></p>
 <div class="card">
   <span class="badge ${chain.ok ? 'ok' : 'bad'}" style="margin-bottom:10px">Cadena del décimo: ${chain.ok ? 'ÍNTEGRA ✓' : 'ALTERADA ✗'}</span>
   <h1 style="margin:10px 0 4px">Tu participación</h1>

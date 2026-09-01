@@ -85,11 +85,15 @@ function addParticipacion(db, { decimoId, importe, nombre = null }) {
   const decimo = db.prepare('SELECT * FROM decimos WHERE id = ?').get(decimoId);
   if (!decimo) return { ok: false, error: 'decimo_no_existe' };
 
-  // hash del último bloque de la cadena actual
-  const last = db
-    .prepare('SELECT hash_actual FROM participaciones WHERE decimo_id = ? ORDER BY created_at DESC, id DESC LIMIT 1')
-    .get(decimoId);
-  const prevHash = last ? last.hash_actual : GENESIS;
+  // hash del último bloque de la cadena: el que NO es hash_anterior de ningún otro.
+  // (No usar ORDER BY created_at: con timestamps al mismo ms el orden es no-determinista.)
+  const all = db.prepare('SELECT hash_actual, hash_anterior FROM participaciones WHERE decimo_id = ?').all(decimoId);
+  let prevHash = GENESIS;
+  if (all.length > 0) {
+    const esAnteriorDe = new Set(all.map((r) => r.hash_anterior));
+    const ultimo = all.find((r) => !esAnteriorDe.has(r.hash_actual));
+    prevHash = ultimo ? ultimo.hash_actual : GENESIS;
+  }
 
   const emitido = db
     .prepare('SELECT COALESCE(SUM(importe),0) AS total FROM participaciones WHERE decimo_id = ?')

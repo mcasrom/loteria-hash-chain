@@ -80,15 +80,18 @@ a{color:#60a5fa}
 
 // 1. Raíz: landing completa y pulida (genérica para cualquier sorteo)
 router.get('/', (req, res) => {
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Registro verificable de participaciones</title>
 <meta name="description" content="Deja constancia de quién participa en un sorteo, boleto o reparto compartido, cuánto aporta y qué porcentaje le corresponde. Cada partícipe recibe un comprobante privado con QR y PDF.">
 <meta property="og:title" content="Registro verificable de participaciones">
 <meta property="og:description" content="Comparte una participación en un sorteo. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
-<meta property="og:image" content="https://pruebapublica.com/assets/og-preview.png">
+<meta property="og:image" content="${baseUrl}/assets/og-preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:url" content="${baseUrl}/">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="manifest" href="/assets/manifest.webmanifest">

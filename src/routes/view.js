@@ -317,9 +317,9 @@ if ('serviceWorker' in navigator) {
     var valor = parseFloat(document.getElementById('inp-valor').value);
     // Aviso suave si no hay número ni serie: se puede continuar, solo informa.
     if (!numero && !serie) {
-      if (!confirm('No has indicado número ni serie del sorteo. ¿El reparto es sin número conocido?\n\n[OK] Continuar sin número\n[Cancelar] Volver a revisar')) return;
+      if (!confirm('No has indicado número ni serie del sorteo. ¿El reparto es sin número conocido?\\n\\n[OK] Continuar sin número\\n[Cancelar] Volver a revisar')) return;
     } else if (!numero) {
-      if (!confirm('No has indicado el número. ¿Continuar sin número?\n\n[OK] Continuar\n[Cancelar] Revisar')) return;
+      if (!confirm('No has indicado el número. ¿Continuar sin número?\\n\\n[OK] Continuar\\n[Cancelar] Revisar')) return;
     }
     if (!isFinite(valor) || valor <= 0) {
       mostrarAviso('⚠️ Introduce un importe total válido (mayor que 0).', 'err');
@@ -577,6 +577,7 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
   apply(saved==='light'?'light':'dark');
   btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
+})();
 </script>
 <div style="text-align:center;margin-top:20px;padding:10px 0">
   <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>
@@ -636,6 +637,7 @@ router.get('/mi-participacion/:token', (req, res) => {
   var saved='dark'; try{ saved=localStorage.getItem('tema')||'dark'; }catch(e){}
   apply(saved==='light'?'light':'dark');
   btn.onclick=function(){ var cur=root.getAttribute('data-theme')==='light'?'dark':'light'; apply(cur); try{localStorage.setItem('tema',cur);}catch(e){} };
+})();
 </script>
 <div style="text-align:center;margin-top:20px;padding:10px 0">
   <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#fff;background:#13C3A5;border-radius:7px;padding:11px 18px;text-decoration:none">☕ Invítame a un café</a>

@@ -1,136 +1,115 @@
-# Lotería Hash-Chain — Décimo en participaciones con cadena de hashes
+# Registro verificable de participaciones
 
-App web (Node.js + Express + SQLite) para repartir un décimo de Lotería de
-Navidad (20€) en participaciones, con **verificación pública mediante una
-cadena de hashes tipo append-only log** (no blockchain real).
+App web (Node.js + Express + SQLite) para **dejar constancia de quién participa
+en un sorteo, boleto o reparto compartido**: cuánto aporta cada persona y qué
+porcentaje del reparto le corresponde. Cada partícipe recibe un **comprobante
+privado** con QR y PDF.
 
-## Fase 2 — qué incluye
+> La herramienta **no crea sorteos, no vende boletos, no custodia dinero y no
+> garantiza resultados**: documenta el acuerdo entre las personas participantes.
 
-- **Imagen de participación** (sharp + qrcode): número, serie, sorteo, importe,
-  nombre y **QR** que apunta a `/verificar/<decimo_id>`. Guardada en
-  `output-samples/imagenes/<participacion_id>.png`.
-- **PDF legal** (pdf-lib): identificación del décimo, depositario, reparto
-  proporcional del premio y **comunidad de bienes (Código Civil)**. En
-  `output-samples/pdfs/<participacion_id>.pdf`.
-- **Endpoint público `/verificar/<decimo_id>`** (sin login): valor total,
-  participaciones emitidas, saldo restante y validación de la cadena (con
-  detalle de en qué participación se rompe si está alterada).
-- **Open Graph dinámico por participación** — ver nota abajo.
-- **UI de participación**: el usuario mete nombre+importe y recibe su imagen y
-  PDF. No necesita conocer a los demás partícipes.
+## Dominio candidato
 
-## Seguridad: cómo detecta manipulación
+Este proyecto está preparado para desplegarse en **`pruebapublica.com`**.
+El `og:image` de la landing apunta a `https://pruebapublica.com/assets/og-preview.png`
+(ajustar el host al desplegar).
 
-Cada participación guarda `hash_actual = SHA256(hash_anterior | decimo_id |
-importe | timestamp)`. Si alguien altera un importe en la BD, el hash
-recalculado ya no coincide → la verificación falla. Test que lo demuestra:
-`ALTERAR UN IMPORTE EN BD ROMPE LA VERIFICACIÓN`.
+## Qué incluye
 
-## IMPORTANTE: Open Graph dinámico o estático
+- **Comprobante por participación** (sharp + qrcode): número, serie, sorteo,
+  importe, nombre y **QR que abre el comprobante privado** de ese partícipe.
+  Guardado en `output-samples/imagenes/<id>.png` (local, no versionado).
+- **Documento de constancia** (pdf-lib): datos del acuerdo, % de participación,
+  referencia a comunidad de bienes y **sello de integridad** (HMAC-SHA256).
+  En `output-samples/pdfs/<id>.pdf`.
+- **Endpoint público `/verificar/<id>`**: muestra total, nº de participaciones,
+  saldo y estado de la cadena. **Sin nombres ni importes individuales**.
+- **Comprobante privado** `/mi-participacion/<access_token>`: única vía al
+  comprobante de cada partícipe, con token aleatorio de 256 bits y rate-limit.
+- **Panel del organizador**: gestiona solo SU sorteo, ve partícipe/importe/%
+  de reparto, comparte enlaces y puede eliminar la última participación.
+- **Tema claro/oscuro** en todas las páginas.
 
-**Es DINÁMICO por participación.** El endpoint
-`/verificar/og/participacion/<decimo_id>` genera la imagen PNG **en cada
-request** con el número, serie y % emitido del décimo. No es una imagen
-estática pre-generada.
+## Seguridad
 
-> Nota de preview en WhatsApp: WhatsApp cachea el og:image de una URL. La
-> primera vez puede tardar o mostrar la versión previa. Para refrescar el
-> preview tras cambiar datos, añadir `?v=<timestamp>` al enlace compartido.
+### Cadena de hashes
+```
+hash_actual = SHA256(hash_anterior | sorteo | importe | timestamp)
+```
+Cada aportación se encadena con la anterior. Si se altera un importe en la BD,
+la verificación lo detecta. **Test que lo demuestra**: alterar un importe rompe
+la cadena (10 tests).
+
+### Privacidad
+- `participacion_id` interno separado del `access_token` público (256 bits).
+- El comprobante solo se sirve por `/mi-participacion/<token>` — no existe otra
+  ruta a los archivos.
+- `output-samples/` (imágenes y PDFs con nombres reales) **NO se versiona**.
+  Backup local en `.privado/` (ignorado).
+
+### Límites honestos
+- No es una blockchain: es una cadena de hashes en SQLite. Detecta alteración
+  de registros, no inmutabilidad frente a un administrador con acceso total.
+- No verifica la existencia/custodia del boleto físico, la identidad real de
+  los partícipes ni el resultado oficial del sorteo.
+- El PDF es un documento de constancia; su valor probatorio depende de las
+  circunstancias y la normativa aplicable.
 
 ## Comandos
 
-### Local (sin Docker) — puerto 3005
 ```bash
 cd ~/loteria-hash-chain
 npm install
-npm run seed                 # crea décimo 85432 (20€) + 3 participaciones (10+5+5)
-npm start                    # server en http://localhost:3005
-npm test                     # 4 tests, incluido el de manipulación
+npm run seed         # registro de ejemplo (sorteo compartido, 20€, 3 participaciones)
+npm start            # http://localhost:3005 (3000 lo usa otro proyecto)
+npm test             # 10 tests
 ```
-
-### Generar entregables (imágenes + PDFs) de las participaciones existentes
-```bash
-node scripts/generar_entregables.js
-# → output-samples/imagenes/*.png y output-samples/pdfs/*.pdf
-```
-
-### Docker
-```bash
-docker compose up --build   # levanta en localhost:3005
-```
-> Nota: el build de Docker necesita red (apt-get instala build-essential para
-> better-sqlite3 y sharp). Si falla por DNS, usar la vía local.
-
-## Rutas para revisar los entregables generados
-
-```bash
-ls ~/loteria-hash-chain/output-samples/imagenes/   # 3 PNG (Ana, Luis, Marta)
-ls ~/loteria-hash-chain/output-samples/pdfs/        # 3 PDF
-```
-
-## Despliegue a VPS (Hetzner + Nginx + PM2 + Docker)
-
-### Variables de entorno (local vs producción)
-| Variable | Local | Producción |
-|---|---|---|
-| `PORT` | 3005 | 3005 (o 3100 si 3005 ocupado) |
-| `DB_PATH` | `./data/loteria.db` | `/data/loteria.db` (volumen) |
-| `BASE_URL` | `http://localhost:3005` | `https://loteria.viajeinteligencia.com` |
-
-> Nota: `BASE_URL` se usa para generar el QR correcto. En producción apunta
-> al dominio público, no a localhost.
-
-### Pasos
-
-```bash
-# 1. Clonar en el server
-git clone https://github.com/mcasrom/loteria-hash-chain.git /home/deploy/loteria-hash-chain
-cd /home/deploy/loteria-hash-chain
-
-# 2. Instalar y build
-npm install
-
-# 3. Arrancar con PM2
-pm2 start src/app.js --name loteria-hash-chain --env PORT=3005
-pm2 save
-
-# 4. Nginx (vhost estático + proxy)
-# /etc/nginx/sites-available/loteria.viajeinteligencia.com
-#   server_name loteria.viajeinteligencia.com;
-#   location / { proxy_pass http://127.0.0.1:3005; proxy_set_header Host $host; }
-#   # + SSL con certbot
-
-# 5. Certbot
-sudo certbot --nginx -d loteria.viajeinteligencia.com
-
-# 6. DNS: loteria -> 178.105.80.193 (Cloudflare, naranja tras emitir cert)
-```
-
-### Docker en VPS (alternativa)
-```bash
-docker compose up -d --build   # puerto 3005, volumen ./data
-```
-
-## Tests (4/4 pasan)
-1. Cadena válida pasa la verificación.
-2. **Alterar un importe en BD rompe la verificación** (crítico de seguridad).
-3. Emitir por encima del valor_total falla.
-4. Importe inválido es rechazado.
 
 ## Estructura
 ```
 src/
   app.js                 # Express (fase 2)
-  db/schema.js           # SQLite (decimos, participaciones, usuarios)
-  db/chain.js            # cadena de hashes
+  db/schema.js           # SQLite (decimos->registros, participaciones, usuarios)
+  db/chain.js            # cadena de hashes + eliminación de última participación
   lib/imagen.js          # imagen de participación (sharp + qrcode)
-  lib/pdf.js             # PDF legal (pdf-lib)
+  lib/pdf.js             # documento de constancia (pdf-lib) + sello de integridad
   lib/og.js              # imagen Open Graph dinámica
-  routes/view.js         # página principal + API + descargas
-  routes/verificar.js    # /verificar/:id público + og dinámico
+  routes/view.js         # landing, panel, participar, comprobante, descargas
+  routes/verificar.js    # /verificar/:id público anónimo + og dinámico
+assets/
+  favicon.svg            # icon view
+  og-preview.png         # preview 1200x630
 scripts/
-  seed.js                # décimo ejemplo 85432
-  generar_entregables.js # regenera imágenes/PDFs
-tests/chain.test.js      # 4 tests
-output-samples/          # imágenes y PDFs generados (versionados)
+  seed.js                # registro de ejemplo
+  generar_entregables.js # regenera imágenes/PDFs (local)
+tests/chain.test.js      # 10 tests
 ```
+
+## Despliegue a VPS (Hetzner + Nginx + PM2)
+
+### Variables de entorno
+| Variable | Local | Producción |
+|---|---|---|
+| `PORT` | 3005 | 3005 |
+| `DB_PATH` | `./data/loteria.db` | `/data/loteria.db` |
+| `SELLO_KEY` | clave local | clave secreta (env) |
+| `BASE_URL` | `http://localhost:3005` | `https://pruebapublica.com` |
+
+```bash
+git clone https://github.com/mcasrom/loteria-hash-chain.git
+cd loteria-hash-chain && npm install
+pm2 start src/app.js --name loteria-hash-chain
+# nginx: proxy a 3005 + certbot + DNS a 178.105.80.193
+```
+
+## Tests (10/10)
+1. Cadena válida pasa la verificación.
+2. Alterar un importe rompe la verificación.
+3. Emitir por encima del valor_total falla.
+4. Importe inválido rechazado.
+5. Access_token de 256 bits, único, no derivable del id.
+6. Un token → una participación.
+7. IDs internos no expuestos vía /verificar.
+8. Token inventado → no existe (404).
+9. Eliminar la última participación no rompe la cadena.
+10. Eliminar intermedia rompe la cadena.

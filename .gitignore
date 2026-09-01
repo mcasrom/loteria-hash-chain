@@ -2,3 +2,8 @@ node_modules/
 data/*.db
 data/*.db-*
 *.log
+# Datos personales de partícipes: NO deben ir a repositorios
+output-samples/imagenes/
+output-samples/pdfs/
+.privado/
+.bsky_creds.env

@@ -581,11 +581,16 @@ router.get('/participa/:decimoId', (req, res) => {
     <div class="kpi"><b>${saldo.toFixed(2)}€</b><span>disponible</span></div>
   </div>
   <div class="bar"><div style="width:${pct}%"></div></div>
-  <p class="muted">Introduce <b>tu nombre</b> y <b>tu aportación</b>. No ves quién más participa. Al aportar recibes tu comprobante personal.</p>
+  <p class="muted">Introduce <b>tu nombre</b>. Si es aportada, indica la cantidad. No ves quién más participa. Al aportar recibes tu comprobante personal.</p>
   ${saldo > 0 ? `<form class="join" data-decimo="${d.id}">
+    <div class="join-row" style="margin-bottom:8px">
+      <label style="font-size:13px;color:var(--mut)">Modalidad:</label>
+      <label style="font-size:13px"><input type="radio" name="modalidad" value="aportada" checked onchange="toggleModalidad()"> Aportada (pagó)</label>
+      <label style="font-size:13px"><input type="radio" name="modalidad" value="gratuita" onchange="toggleModalidad()"> Gratuita (regalo)</label>
+    </div>
     <div class="join-row">
       <input name="nombre" placeholder="Tu nombre" >
-      <input name="importe" type="number" step="0.01" min="0" max="${saldo}" placeholder="Tu aportación €" >
+      <input name="importe" type="number" step="0.01" min="0" max="${saldo}" placeholder="Importe € (opcional en gratuita)" id="inp-importe">
       <button>Aportar</button>
     </div>
     <p class="msg"></p>

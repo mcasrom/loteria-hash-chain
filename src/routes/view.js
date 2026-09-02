@@ -602,9 +602,13 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   ev.preventDefault();
   var form=ev.target, did=form.dataset.decimo;
   var nombre=form.querySelector('[name=nombre]').value;
-  var importe=parseFloat(form.querySelector('[name=importe]').value);
+  var modalidadEl=form.querySelector('[name=modalidad]');
+  var modalidad=modalidadEl?modalidadEl.value:'aportada';
+  var importeEl=form.querySelector('[name=importe]');
+  var importeVal=importeEl?importeEl.value:'';
+  var importe=importeVal?parseFloat(importeVal):null;
   var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando tu comprobante...';
-  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({importe,nombre})});
+  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:nombre,modalidad:modalidad,importe:importe})});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
   msg.className='msg ok';

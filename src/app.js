@@ -30,7 +30,8 @@ app.use('/verificar', verificarRouter);
 // Añadir participación (con validación de cadena y de valor_total)
 app.post('/decimos/:id/participaciones', async (req, res) => {
   const { importe, nombre, modalidad = 'aportada', valorReferencia } = req.body || {};
-  const r = addParticipacion(db, { decimoId: req.params.id, importe, nombre, modalidad, valorReferencia });
+  const ip = req.ip || req.connection.remoteAddress || null;
+  const r = addParticipacion(db, { decimoId: req.params.id, importe, nombre, modalidad, valorReferencia, ip });
   if (!r.ok) return res.status(r.error === 'supera_valor_total' ? 409 : 400).json({ error: r.error, message: r.message });
   // generar imagen + PDF de la participación
   const decimo = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.id);

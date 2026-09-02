@@ -202,7 +202,7 @@ footer a{color:var(--accent);text-decoration:none}
         <input name="numero" id="inp-numero" placeholder="Número (si lo hay, ej. 85432)">
         <input name="serie" id="inp-serie" placeholder="Serie (si lo hay)">
         <input name="sorteo" placeholder="Nombre del sorteo o reparto" value="Sorteo compartido">
-        <input name="valor_total" id="inp-valor" type="number" step="0.01" min="1" value="20" placeholder="Importe de referencia €" required>
+        <input name="valor_total" id="inp-valor" type="number" step="0.01" min="1" value="20" placeholder="Importe de referencia €" >
       </div>
       <button class="btn-big" type="submit">🎟️ Crear el registro de participaciones</button>
     </form>
@@ -451,8 +451,8 @@ ${cerrado ? '' : `<div class="card">
     <label style="font-size:13px"><input type="radio" name="modalidad" value="gratuita" onchange="toggleModalidad()"> Gratuita (regalo)</label>
   </div>
   <div class="join-row">
-    <input name="nombre" placeholder="Nombre del partícipe" required>
-    <input name="importe" type="number" step="0.01" min="0.01" max="${saldo > 0 ? saldo : 0}" placeholder="Importe €" required>
+    <input name="nombre" placeholder="Nombre del partícipe" >
+    <input name="importe" type="number" step="0.01" min="0" max="${saldo > 0 ? saldo : 0}" placeholder="Importe €" >
     <button>Añadir</button>
   </div>
   <p class="msg"></p>
@@ -486,7 +486,7 @@ function toggleModalidad(){
   var hint=document.getElementById('mod-hint');
   var importe=f.querySelector('[name=importe]');
   if(m==='gratuita'){
-    importe.placeholder='Valor de la cuota regalada €';
+    importe.placeholder="Importe € (opcional)";
     if(hint) hint.innerHTML='Modalidad <b>gratuita</b>: asignas una cuota del décimo sin que el partícipe pague nada. Se registra "importe aportado 0 €" y un valor de referencia.';
   } else {
     importe.placeholder='Importe €';
@@ -584,8 +584,8 @@ router.get('/participa/:decimoId', (req, res) => {
   <p class="muted">Introduce <b>tu nombre</b> y <b>tu aportación</b>. No ves quién más participa. Al aportar recibes tu comprobante personal.</p>
   ${saldo > 0 ? `<form class="join" data-decimo="${d.id}">
     <div class="join-row">
-      <input name="nombre" placeholder="Tu nombre" required>
-      <input name="importe" type="number" step="0.01" min="0.01" max="${saldo}" placeholder="Tu aportación €" required>
+      <input name="nombre" placeholder="Tu nombre" >
+      <input name="importe" type="number" step="0.01" min="0" max="${saldo}" placeholder="Tu aportación €" >
       <button>Aportar</button>
     </div>
     <p class="msg"></p>

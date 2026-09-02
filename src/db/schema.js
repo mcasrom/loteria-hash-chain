@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS decimos (
 CREATE TABLE IF NOT EXISTS participaciones (
   id TEXT PRIMARY KEY,
   decimo_id TEXT NOT NULL REFERENCES decimos(id),
-  importe REAL NOT NULL,
+  importe REAL NULL,
   nombre_participante TEXT NULL,
   hash_anterior TEXT NOT NULL,
   hash_actual TEXT NOT NULL,
@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS participaciones (
   aceptado_at TEXT NULL,
   aceptado_ip TEXT NULL,
   aceptado_ua TEXT NULL,
-  aceptado_hash TEXT NULL
+  aceptado_hash TEXT NULL,
+  registrado_ip TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -92,6 +93,7 @@ function migrar(db) {
     aceptado_ip: 'TEXT NULL',
     aceptado_ua: 'TEXT NULL',
     aceptado_hash: 'TEXT NULL',
+    registrado_ip: 'TEXT NULL',
   };
   for (const [name, def] of Object.entries(nuevas)) {
     if (!cols.includes(name)) db.exec(`ALTER TABLE participaciones ADD COLUMN ${name} ${def}`);

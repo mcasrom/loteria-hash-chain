@@ -590,7 +590,7 @@ router.get('/participa/:decimoId', (req, res) => {
     </div>
     <div class="join-row">
       <input name="nombre" placeholder="Tu nombre" >
-      <input name="importe" type="number" step="0.01" min="0" max="${saldo}" placeholder="Importe € (opcional en gratuita)" id="inp-importe">
+      <input name="importe" type="number" step="0.01" min="0" max="${saldo}" placeholder="Importe € o Regalo" id="inp-importe">
       <button>Aportar</button>
     </div>
     <p class="msg"></p>

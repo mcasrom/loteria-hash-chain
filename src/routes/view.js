@@ -469,10 +469,12 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   ev.preventDefault();
   var form=ev.target, did=form.dataset.decimo;
   var nombre=form.querySelector('[name=nombre]').value;
-  var modalidad=form.querySelector('input[name=modalidad]:checked').value;
-  var valorCampo=parseFloat(form.querySelector('[name=importe]').value);
-  var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando...';
-  var body = modalidad==='gratuita' ? {importe: null, valorReferencia: valorCampo, nombre, modalidad} : {importe: valorCampo, nombre, modalidad};
+  var importeEl=form.querySelector('[name=importe]');
+  var importeVal=importeEl?importeEl.value.trim():'';
+  var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando tu comprobante...';
+  var body={nombre:nombre};
+  if(importeVal===''){body.modalidad='gratuita';}
+  else{body.modalidad='aportada';body.importe=parseFloat(importeVal);}
   var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
@@ -602,13 +604,13 @@ document.querySelector('.join') && document.querySelector('.join').addEventListe
   ev.preventDefault();
   var form=ev.target, did=form.dataset.decimo;
   var nombre=form.querySelector('[name=nombre]').value;
-  var modalidadEl=form.querySelector('[name=modalidad]');
-  var modalidad=modalidadEl?modalidadEl.value:'aportada';
   var importeEl=form.querySelector('[name=importe]');
-  var importeVal=importeEl?importeEl.value:'';
-  var importe=importeVal?parseFloat(importeVal):null;
+  var importeVal=importeEl?importeEl.value.trim():'';
   var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando tu comprobante...';
-  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:nombre,modalidad:modalidad,importe:importe})});
+  var body={nombre:nombre};
+  if(importeVal===''){body.modalidad='gratuita';}
+  else{body.modalidad='aportada';body.importe=parseFloat(importeVal);}
+  var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
   msg.className='msg ok';

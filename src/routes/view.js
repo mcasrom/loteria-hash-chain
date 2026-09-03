@@ -191,6 +191,7 @@ footer a{color:var(--accent);text-decoration:none}
   <div class="sub-badges"><span>🔗 Registro verificable</span><span>🔒 Comprobantes privados</span><span>📄 PDF de constancia</span><span>📱 Fácil de compartir</span></div>
   <div class="cta-row">
     <a class="cta" href="#registrar">🎟️ Crear registro de participaciones</a>
+    <a class="cta2" href="javascript:void(0)" onclick="openWelcome()">✨ Qué te ofrecemos</a>
     <a class="cta2" href="#como">Ver un ejemplo</a>
   </div>
 </header>
@@ -328,9 +329,14 @@ footer a{color:var(--accent);text-decoration:none}
     try { localStorage.setItem('tema', cur); } catch(e){}
   };
 })();
-function closeWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.remove('show');try{localStorage.setItem('loteria-welcomed','1');}catch(e){}}
+function openWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.add('show');}
+function closeWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.remove('show');try{localStorage.setItem('loteria-welcomed',String(Date.now()));}catch(e){}}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeWelcome();});
-try{if(!localStorage.getItem('loteria-welcomed')){setTimeout(function(){var m=document.getElementById('welcome-modal');if(m)m.classList.add('show');},800);}}catch(e){setTimeout(function(){var m=document.getElementById('welcome-modal');if(m)m.classList.add('show');},800);}
+try{
+  var wf=localStorage.getItem('loteria-welcomed');
+  var ms=Date.now()-(wf?parseInt(wf)||0:0);
+  if(!wf||ms>86400000){setTimeout(openWelcome,800);} // re-muestra cada 24h si no ha creado
+}catch(e){setTimeout(openWelcome,800);}
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/assets/sw.js'); });
 }

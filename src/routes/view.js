@@ -257,7 +257,7 @@ footer a{color:var(--accent);text-decoration:none}
   <h2 class="sec">Un acuerdo claro, privado y verificable</h2>
   <p class="sec-sub">Menos malentendidos. Más constancia del acuerdo.</p>
   <div class="feats">
-    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada registro queda vinculado al anterior mediante hashes. Si se altera un dato registrado, la comprobación de integridad puede detectarlo. <a href="javascript:void(0)" onclick="document.getElementById('hash-modal').classList.add('show')" style="color:var(--accent);font-weight:600">¿Cómo funciona la cadena hash? →</a></p></div></div>
+    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada registro queda vinculado al anterior mediante hashes. Si se altera un dato registrado, la comprobación de integridad puede detectarlo.</p></div></div>
     <div class="feat"><div class="ic">🔒</div><div><b>Comprobantes privados</b><p>Cada persona accede solo a su propio comprobante. Los nombres y aportaciones individuales no se publican.</p></div></div>
     <div class="feat"><div class="ic">🕵️</div><div><b>Verificación sin exponer datos</b><p>El QR permite consultar el estado del registro sin mostrar la identidad ni el importe de cada partícipe.</p></div></div>
     <div class="feat"><div class="ic">📄</div><div><b>Documento de constancia</b><p>Cada comprobante incluye los datos del acuerdo de participación y reparto, para conservarlos en PDF.</p></div></div>
@@ -293,56 +293,21 @@ footer a{color:var(--accent);text-decoration:none}
 </footer>
 </div>
 
-<!-- MODAL: Cómo funciona la cadena hash -->
-<div id="hash-modal" class="hm" onclick="if(event.target===this)this.classList.remove('show')">
-<div style="background:#070b18;border:1px solid #1c2a47;border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 25px 80px rgba(0,0,0,.5)">
-  <button onclick="document.getElementById('hash-modal').classList.remove('show')" style="position:absolute;top:16px;right:16px;background:#101b33;border:1px solid #1c2a47;color:#e8eefb;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
-  <h2 style="margin:0 0 6px;font-size:22px;color:#e8eefb">🔗 Cómo funciona la cadena hash</h2>
-  <p style="color:#8ba0c4;font-size:14px;margin:0 0 20px">El mecanismo que hace que un registro no se pueda alterar sin que se detecte.</p>
-
-  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:#f59e0b">Paso 1 · Registro genesis</b>
-    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">Cuando se crea el primer participación, el sistema parte de un hash vacío: <code style="background:#0d1528;padding:2px 6px;border-radius:4px;font-size:12px;color:#e8eefb">0000...0000</code> (64 ceros). Este es el punto de anclaje de toda la cadena.</p>
+<!-- MODAL: Bienvenida + funnel -->
+<div id="welcome-modal" class="hm" onclick="if(event.target===this)closeWelcome()">
+<div style="background:#070b18;border:1px solid #1c2a47;border-radius:24px;max-width:520px;width:100%;padding:36px 32px 30px;position:relative;box-shadow:0 30px 90px rgba(0,0,0,.6);text-align:center">
+  <button onclick="closeWelcome()" style="position:absolute;top:14px;right:14px;background:transparent;border:none;color:#8ba0c4;font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:8px">✕</button>
+  <div style="font-size:48px;margin-bottom:12px">🎟️</div>
+  <h2 style="margin:0 0 8px;font-size:24px;color:#e8eefb;line-height:1.3">Comparte una participación.<br><span style="color:#f59e0b">Deja el reparto por escrito.</span></h2>
+  <p style="color:#8ba0c4;font-size:15px;margin:0 0 22px;line-height:1.6">Si ya tienes un décimo, una rifa o un bote compartido, registra quién participa, cuánto aporta y qué porcentaje le corresponde.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px">
+    <span style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px">✓ Gratis</span>
+    <span style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px">🔒 Privado</span>
+    <span style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fbbf24;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px">🔗 Verificable</span>
+    <span style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#a78bfa;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px">📄 PDF</span>
   </div>
-
-  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:#f59e0b">Paso 2 · Cada participación genera un hash</b>
-    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">Al registrar una aportación, el sistema calcula:</p>
-    <div style="background:#0d1528;border-radius:8px;padding:12px;margin:10px 0;font-family:monospace;font-size:12.5px;color:#e8eefb;word-break:break-all">
-      hash = SHA256(<span style="color:#f59e0b">hash_anterior</span> | <span style="color:#34d399">id_décimo</span> | <span style="color:#f87171">importe</span> | <span style="color:#3b82f6">fecha</span>)
-    </div>
-    <p style="color:#8ba0c4;font-size:13px;margin:0">El resultado es una huella digital única de 64 caracteres. Si cambia CUALQUIER dato (importe, fecha, id), el hash resulta completamente distinto.</p>
-  </div>
-
-  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:#f59e0b">Paso 3 · Vinculación encadenada</b>
-    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">El hash de cada participación se convierte en el <code style="background:#0d1528;padding:2px 6px;border-radius:4px;font-size:12px;color:#e8eefb">hash_anterior</code> de la siguiente. Así:</p>
-    <div style="background:#0d1528;border-radius:8px;padding:14px;margin:10px 0;font-family:monospace;font-size:12px;line-height:2;color:#e8eefb">
-      <span style="color:#8ba0c4">Genesis</span> → <span style="color:#34d399">Ana: 10€</span> → <span style="color:#34d399">Luis: 5€</span> → <span style="color:#34d399">Marta: 5€</span><br>
-      <span style="color:#8ba0c4">0000...0</span> → <span style="color:#f59e0b">a3f8b2c1...</span> → <span style="color:#f59e0b">7d2e9f4a...</span> → <span style="color:#f59e0b">1b5c8d3e...</span>
-    </div>
-    <p style="color:#8ba0c4;font-size:13px;margin:0">Si alguien altera el importe de Luis en la base de datos, el hash de Luis cambia, el de Marta ya no encaja, y toda la cadena posterior se rompe.</p>
-  </div>
-
-  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:#f59e0b">Paso 4 · Verificación pública</b>
-    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">Cualquiera puede comprobar la integridad de la cadena en <a href="/verificar/" style="color:#f59e0b">/verificar/:id</a>. El sistema recalcula cada hash desde el genesis y compara con el almacenado. Si coinciden → <span style="color:#34d399">INTEGRA</span>. Si no → <span style="color:#f87171">ALTERADA</span>.</p>
-  </div>
-
-  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(255,191,36,.25);border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:#fbbf24">⚡ ¿Por qué es robusto?</b>
-    <ul style="color:#8ba0c4;font-size:13px;margin:8px 0 0;padding-left:18px;line-height:1.8">
-      <li><b>SHA-256</b> es el mismo algoritmo que usa Bitcoin, TLS y los bancos. No existe forma conocida de generar colisiones.</li>
-      <li>Cualquier alteración de <b>un solo dato</b> rompe <b>toda la cadena</b> posterior.</li>
-      <li>El hash es <b>determinista</b>: mismos datos = mismo resultado, siempre.</li>
-      <li>No depende de ningún secreto: la seguridad está en la estructura matemática, no en ocultar información.</li>
-    </ul>
-  </div>
-
-  <div style="background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:12px;padding:18px;margin-bottom:0">
-    <b style="color:#f87171">⚠️ Limitación honesta</b>
-    <p style="color:#8ba0c4;font-size:13px;margin:6px 0 0">Un administrador con acceso directo al servidor podría alterar datos y recomputar hashes. La cadena protege contra manipulación externa, no contra un administrador malicioso con acceso root. Esto es una propiedad del diseño, no un defecto: la herramienta documenta acuerdos entre personas, no sustituye la confianza en un tercero.</p>
-  </div>
+  <a href="#registrar" onclick="closeWelcome()" style="display:inline-block;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;padding:15px 36px;border-radius:12px;font-weight:800;font-size:16px;text-decoration:none;box-shadow:0 8px 30px rgba(37,99,235,.4)">🎟️ Crear mi registro</a>
+  <p style="color:#5b6b85;font-size:12px;margin:16px 0 0">Sin cuentas · Sin custodiar dinero · Cada uno recibe su comprobante privado</p>
 </div>
 </div>
 
@@ -363,7 +328,9 @@ footer a{color:var(--accent);text-decoration:none}
     try { localStorage.setItem('tema', cur); } catch(e){}
   };
 })();
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){var m=document.getElementById('hash-modal');if(m)m.classList.remove('show');}});
+function closeWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.remove('show');try{localStorage.setItem('loteria-welcomed','1');}catch(e){}}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeWelcome();});
+try{if(!localStorage.getItem('loteria-welcomed')){setTimeout(function(){var m=document.getElementById('welcome-modal');if(m)m.classList.add('show');},800);}}catch(e){setTimeout(function(){var m=document.getElementById('welcome-modal');if(m)m.classList.add('show');},800);}
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/assets/sw.js'); });
 }

@@ -52,6 +52,7 @@ app.post('/decimos/:id/participaciones', async (req, res) => {
       participacionId: p.id, numero: decimo.numero, serie: decimo.serie,
       sorteo: decimo.sorteo, importe: p.importe, nombre, valorTotal: decimo.valor_total, decimoId: decimo.id,
       modalidad: p.modalidad,
+      createdAt: p.created_at,
       firmaOrganizador: decimo.firmado_org_at ? { at: decimo.firmado_org_at, hash: decimo.firmado_org_hash } : null,
     });
   } catch (e) { console.error('pdf err:', e.message); }
@@ -97,6 +98,7 @@ app.post('/mi-participacion/:token/aceptar', (req, res) => {
       participacionId: p.id, numero: decimo.numero, serie: decimo.serie,
       sorteo: decimo.sorteo, importe: p.importe, nombre: p.nombre_participante,
       valorTotal: decimo.valor_total, decimoId: decimo.id, modalidad: p.modalidad,
+      createdAt: p.created_at,
       aceptacion: { at: ahora, hash: docHash },
       firmaOrganizador: decimo.firmado_org_at ? { at: decimo.firmado_org_at, hash: decimo.firmado_org_hash } : null,
     }).catch((e) => console.error('pdf aceptacion err:', e.message));
@@ -165,6 +167,28 @@ app.get('/decimos/:id/verificar-api', (req, res) => {
   if (!decimo) return res.status(404).json({ error: 'decimo_no_existe' });
   const { ok, participaciones, n } = computeChain(db, req.params.id);
   res.json({ ok, integro: ok, n, participaciones });
+});
+
+// Verificar el sello HMAC de un PDF (público): dado el id público de una
+// participación (access_token NO requerido: se usa el id interno solo para
+// recalcular y comparar; nunca se expone el sello en sí de forma que permita
+// forjarlo). Devuelve si el sello coincide con los datos almacenados.
+// El sello solo es comprobable: la clave no viaja en la respuesta.
+app.get('/verificar-sello/:participacionId', (req, res) => {
+  const p = db.prepare('SELECT * FROM participaciones WHERE id = ?').get(req.params.participacionId);
+  if (!p) return res.status(404).json({ error: 'participacion_no_existe' });
+  const decimo = db.prepare('SELECT numero, serie FROM decimos WHERE id = ?').get(p.decimo_id);
+  if (!decimo) return res.status(404).json({ error: 'decimo_no_existe' });
+  const selloPdf = String(req.query.sello || '');
+  const { verificarSello } = require('./lib/pdf');
+  const selloOk = verificarSello(p.id, decimo.numero, decimo.serie, p.importe, p.nombre_participante, p.modalidad, selloPdf, p.created_at);
+  res.json({
+    ok: selloOk,
+    valido: selloOk,
+    v2: !!p.created_at,
+    participacion: p.id,
+    decimo: p.decimo_id,
+  });
 });
 
 // Política de retención: anonimiza repartos vencidos (ejecutar por cron).

@@ -14,18 +14,39 @@ const OUT_PDFS = path.join(__dirname, '..', '..', 'output-samples', 'pdfs');
 // legal: es una prueba de que el contenido no se modificó tras generarse.
 const SELLO_KEY = process.env.SELLO_KEY || 'aegis-loteria-sello-clave-local';
 
+// Sello v1 (sin timestamp) — participaciones antiguas
 function selloIntegridad(participacionId, numero, serie, importe, nombre, modalidad) {
   const payload = `${participacionId}|${numero}|${serie}|${importe}|${nombre}|${modalidad}`;
   return crypto.createHmac('sha256', SELLO_KEY).update(payload, 'utf8').digest('hex');
 }
 
-async function generarPdf({ participacionId, numero, serie, sorteo, importe, nombre, valorTotal, decimoId, depositario = 'Organizador', modalidad = 'aportada', aceptacion = null, firmaOrganizador = null }) {
+// Sello v2 (con timestamp) — participaciones nuevas, incluye fecha de creación
+function selloIntegridadV2(participacionId, numero, serie, importe, nombre, modalidad, createdAt) {
+  const payload = `${participacionId}|${numero}|${serie}|${importe}|${nombre}|${modalidad}|${createdAt}`;
+  return crypto.createHmac('sha256', SELLO_KEY).update(payload, 'utf8').digest('hex');
+}
+
+// Verificar sello (v1 o v2): prueba primero la versión que corresponde a la
+// participación (v2 si tiene created_at) y si no coincide intenta la otra.
+// Esto mantiene compatibilidad con PDFs generados antes de incluir timestamp.
+function verificarSello(participacionId, numero, serie, importe, nombre, modalidad, sello, createdAt) {
+  if (!sello) return false;
+  if (createdAt) {
+    if (selloIntegridadV2(participacionId, numero, serie, importe, nombre, modalidad, createdAt) === sello) return true;
+  }
+  return selloIntegridad(participacionId, numero, serie, importe, nombre, modalidad) === sello;
+}
+
+async function generarPdf({ participacionId, numero, serie, sorteo, importe, nombre, valorTotal, decimoId, depositario = 'Organizador', modalidad = 'aportada', aceptacion = null, firmaOrganizador = null, createdAt = null }) {
   fs.mkdirSync(OUT_PDFS, { recursive: true });
 
   const esGratuita = modalidad === 'gratuita';
   const valorEco = esGratuita ? (importe || 0) : (importe || 0);
   const dineroEntregado = esGratuita ? 0 : (importe || 0);
-  const sello = selloIntegridad(participacionId, numero, serie, valorEco, nombre, modalidad);
+  // Sello v2 si hay timestamp (participaciones nuevas); si no, v1 (antiguas)
+  const sello = createdAt
+    ? selloIntegridadV2(participacionId, numero, serie, valorEco, nombre, modalidad, createdAt)
+    : selloIntegridad(participacionId, numero, serie, valorEco, nombre, modalidad);
 
   const pdf = await PDFDocument.create();
   const page = pdf.addPage([595, 842]); // A4
@@ -101,7 +122,12 @@ async function generarPdf({ participacionId, numero, serie, sorteo, importe, nom
   page.drawText('   existencia, autenticidad, titularidad o custodia física del décimo.', { x: 50, y: y(778), size: 8, font, color: rgb(0.45, 0.45, 0.55) });
 
   page.drawText('7. Sello de integridad', { x: 50, y: y(800), size: 11, font: bold });
-  page.drawText(`   HMAC-SHA256 del contenido: ${sello}`, { x: 50, y: y(818), size: 7.5, font, color: rgb(0.4, 0.4, 0.5) });
+  if (createdAt) {
+    page.drawText(`   Sello v2 · HMAC-SHA256: ${sello}`, { x: 50, y: y(816), size: 7, font, color: rgb(0.4, 0.4, 0.5) });
+    page.drawText(`   Registrado (UTC): ${createdAt}`, { x: 50, y: y(828), size: 7.5, font, color: rgb(0.4, 0.4, 0.5) });
+  } else {
+    page.drawText(`   HMAC-SHA256 del contenido: ${sello}`, { x: 50, y: y(818), size: 7.5, font, color: rgb(0.4, 0.4, 0.5) });
+  }
 
   // === PÁGINA 2: aceptación + declaraciones ===
   const page2 = pdf.addPage([595, 842]);
@@ -157,4 +183,4 @@ async function generarPdf({ participacionId, numero, serie, sorteo, importe, nom
   return outFile;
 }
 
-module.exports = { generarPdf, OUT_PDFS };
+module.exports = { generarPdf, OUT_PDFS, selloIntegridad, selloIntegridadV2, verificarSello };

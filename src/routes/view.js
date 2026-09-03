@@ -293,43 +293,43 @@ footer a{color:var(--accent);text-decoration:none}
 
 <!-- MODAL: Cómo funciona la cadena hash -->
 <div id="hash-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
-<div style="background:var(--bg);border:1px solid var(--line);border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 25px 80px rgba(0,0,0,.5)">
-  <button onclick="document.getElementById('hash-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:var(--card);border:1px solid var(--line);color:var(--fg);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
-  <h2 style="margin:0 0 6px;font-size:22px">🔗 Cómo funciona la cadena hash</h2>
-  <p style="color:var(--mut);font-size:14px;margin:0 0 20px">El mecanismo que hace que un registro no se pueda alterar sin que se detecte.</p>
+<div style="background:#070b18;border:1px solid #1c2a47;border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 25px 80px rgba(0,0,0,.5)">
+  <button onclick="document.getElementById('hash-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:#101b33;border:1px solid #1c2a47;color:#e8eefb;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+  <h2 style="margin:0 0 6px;font-size:22px;color:#e8eefb">🔗 Cómo funciona la cadena hash</h2>
+  <p style="color:#8ba0c4;font-size:14px;margin:0 0 20px">El mecanismo que hace que un registro no se pueda alterar sin que se detecte.</p>
 
-  <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:var(--accent)">Paso 1 · Registro genesis</b>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Cuando se crea el primer participación, el sistema parte de un hash vacío: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;font-size:12px">0000...0000</code> (64 ceros). Este es el punto de anclaje de toda la cadena.</p>
+  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
+    <b style="color:#f59e0b">Paso 1 · Registro genesis</b>
+    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">Cuando se crea el primer participación, el sistema parte de un hash vacío: <code style="background:#0d1528;padding:2px 6px;border-radius:4px;font-size:12px;color:#e8eefb">0000...0000</code> (64 ceros). Este es el punto de anclaje de toda la cadena.</p>
   </div>
 
-  <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:var(--accent)">Paso 2 · Cada participación genera un hash</b>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Al registrar una aportación, el sistema calcula:</p>
-    <div style="background:var(--bg2);border-radius:8px;padding:12px;margin:10px 0;font-family:monospace;font-size:12.5px;color:var(--fg);word-break:break-all">
-      hash = SHA256(<span style="color:var(--accent)">hash_anterior</span> | <span style="color:var(--ok)">id_décimo</span> | <span style="color:#f87171">importe</span> | <span style="color:var(--accent2)">fecha</span>)
+  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
+    <b style="color:#f59e0b">Paso 2 · Cada participación genera un hash</b>
+    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">Al registrar una aportación, el sistema calcula:</p>
+    <div style="background:#0d1528;border-radius:8px;padding:12px;margin:10px 0;font-family:monospace;font-size:12.5px;color:#e8eefb;word-break:break-all">
+      hash = SHA256(<span style="color:#f59e0b">hash_anterior</span> | <span style="color:#34d399">id_décimo</span> | <span style="color:#f87171">importe</span> | <span style="color:#3b82f6">fecha</span>)
     </div>
-    <p style="color:var(--mut);font-size:13px;margin:0">El resultado es una huella digital única de 64 caracteres. Si cambia CUALQUIER dato (importe, fecha, id), el hash resulta completamente distinto.</p>
+    <p style="color:#8ba0c4;font-size:13px;margin:0">El resultado es una huella digital única de 64 caracteres. Si cambia CUALQUIER dato (importe, fecha, id), el hash resulta completamente distinto.</p>
   </div>
 
-  <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:var(--accent)">Paso 3 · Vinculación encadenada</b>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">El hash de cada participación se convierte en el <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;font-size:12px">hash_anterior</code> de la siguiente. Así:</p>
-    <div style="background:var(--bg2);border-radius:8px;padding:14px;margin:10px 0;font-family:monospace;font-size:12px;line-height:2;color:var(--fg)">
-      <span style="color:var(--mut)">Genesis</span> → <span style="color:var(--ok)">Ana: 10€</span> → <span style="color:var(--ok)">Luis: 5€</span> → <span style="color:var(--ok)">Marta: 5€</span><br>
-      <span style="color:var(--mut)">0000...0</span> → <span style="color:var(--accent)">a3f8b2c1...</span> → <span style="color:var(--accent)">7d2e9f4a...</span> → <span style="color:var(--accent)">1b5c8d3e...</span>
+  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
+    <b style="color:#f59e0b">Paso 3 · Vinculación encadenada</b>
+    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">El hash de cada participación se convierte en el <code style="background:#0d1528;padding:2px 6px;border-radius:4px;font-size:12px;color:#e8eefb">hash_anterior</code> de la siguiente. Así:</p>
+    <div style="background:#0d1528;border-radius:8px;padding:14px;margin:10px 0;font-family:monospace;font-size:12px;line-height:2;color:#e8eefb">
+      <span style="color:#8ba0c4">Genesis</span> → <span style="color:#34d399">Ana: 10€</span> → <span style="color:#34d399">Luis: 5€</span> → <span style="color:#34d399">Marta: 5€</span><br>
+      <span style="color:#8ba0c4">0000...0</span> → <span style="color:#f59e0b">a3f8b2c1...</span> → <span style="color:#f59e0b">7d2e9f4a...</span> → <span style="color:#f59e0b">1b5c8d3e...</span>
     </div>
-    <p style="color:var(--mut);font-size:13px;margin:0">Si alguien altera el importe de Luis en la base de datos, el hash de Luis cambia, el de Marta ya no encaja, y toda la cadena posterior se rompe.</p>
+    <p style="color:#8ba0c4;font-size:13px;margin:0">Si alguien altera el importe de Luis en la base de datos, el hash de Luis cambia, el de Marta ya no encaja, y toda la cadena posterior se rompe.</p>
   </div>
 
-  <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:var(--accent)">Paso 4 · Verificación pública</b>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Cualquiera puede comprobar la integridad de la cadena en <a href="/verificar/" style="color:var(--accent)">/verificar/:id</a>. El sistema recalcula cada hash desde el genesis y compara con el almacenado. Si coinciden → <span style="color:var(--ok)">INTEGRA</span>. Si no → <span style="color:#f87171">ALTERADA</span>.</p>
+  <div style="background:#101b33;border:1px solid #1c2a47;border-radius:12px;padding:18px;margin-bottom:16px">
+    <b style="color:#f59e0b">Paso 4 · Verificación pública</b>
+    <p style="color:#8ba0c4;font-size:13.5px;margin:6px 0 0">Cualquiera puede comprobar la integridad de la cadena en <a href="/verificar/" style="color:#f59e0b">/verificar/:id</a>. El sistema recalcula cada hash desde el genesis y compara con el almacenado. Si coinciden → <span style="color:#34d399">INTEGRA</span>. Si no → <span style="color:#f87171">ALTERADA</span>.</p>
   </div>
 
   <div style="background:rgba(245,158,11,.08);border:1px solid rgba(255,191,36,.25);border-radius:12px;padding:18px;margin-bottom:16px">
-    <b style="color:var(--warn)">⚡ ¿Por qué es robusto?</b>
-    <ul style="color:var(--mut);font-size:13px;margin:8px 0 0;padding-left:18px;line-height:1.8">
+    <b style="color:#fbbf24">⚡ ¿Por qué es robusto?</b>
+    <ul style="color:#8ba0c4;font-size:13px;margin:8px 0 0;padding-left:18px;line-height:1.8">
       <li><b>SHA-256</b> es el mismo algoritmo que usa Bitcoin, TLS y los bancos. No existe forma conocida de generar colisiones.</li>
       <li>Cualquier alteración de <b>un solo dato</b> rompe <b>toda la cadena</b> posterior.</li>
       <li>El hash es <b>determinista</b>: mismos datos = mismo resultado, siempre.</li>
@@ -338,8 +338,8 @@ footer a{color:var(--accent);text-decoration:none}
   </div>
 
   <div style="background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:12px;padding:18px;margin-bottom:0">
-    <b style="color:var(--err)">⚠️ Limitación honesta</b>
-    <p style="color:var(--mut);font-size:13px;margin:6px 0 0">Un administrador con acceso directo al servidor podría alterar datos y recomputar hashes. La cadena protege contra manipulación externa, no contra un administrador malicioso con acceso root. Esto es una propiedad del diseño, no un defecto: la herramienta documenta acuerdos entre personas, no sustituye la confianza en un tercero.</p>
+    <b style="color:#f87171">⚠️ Limitación honesta</b>
+    <p style="color:#8ba0c4;font-size:13px;margin:6px 0 0">Un administrador con acceso directo al servidor podría alterar datos y recomputar hashes. La cadena protege contra manipulación externa, no contra un administrador malicioso con acceso root. Esto es una propiedad del diseño, no un defecto: la herramienta documenta acuerdos entre personas, no sustituye la confianza en un tercero.</p>
   </div>
 </div>
 </div>

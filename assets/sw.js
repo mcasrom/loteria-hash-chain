@@ -1,6 +1,6 @@
 // Service Worker — Registro verificable de participaciones (PWA)
 // Estrategia: network-first para HTML/API, cache-first para assets estáticos.
-const CACHE = 'loteria-hash-v1';
+const CACHE = 'loteria-hash-v2';
 const CORE = ['/', '/assets/favicon.svg', '/assets/icon-192.png', '/assets/icon-512.png', '/assets/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {

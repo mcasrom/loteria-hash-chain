@@ -330,13 +330,11 @@ footer a{color:var(--accent);text-decoration:none}
   };
 })();
 function openWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.add('show');}
-function closeWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.remove('show');try{localStorage.setItem('loteria-welcomed',String(Date.now()));}catch(e){}}
+function closeWelcome(){var m=document.getElementById('welcome-modal');if(m)m.classList.remove('show');}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeWelcome();});
-try{
-  var wf=localStorage.getItem('loteria-welcomed');
-  var ms=Date.now()-(wf?parseInt(wf)||0:0);
-  if(!wf||ms>86400000){setTimeout(openWelcome,800);} // re-muestra cada 24h si no ha creado
-}catch(e){setTimeout(openWelcome,800);}
+// Auto-abre el popup de bienvenida en CADA carga de la landing (sin supresión
+// persistente): es el funnel de enganche. El usuario lo cierra con X/Escape/clic fuera.
+setTimeout(openWelcome,900);
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/assets/sw.js'); });
 }

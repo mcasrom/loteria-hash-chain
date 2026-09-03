@@ -115,6 +115,8 @@ radial-gradient(800px 500px at 0% 0%,rgba(59,130,246,.10),transparent),var(--bg)
 .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
 .theme-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center;margin-left:14px}
 .theme-btn:hover{background:var(--bg2)}
+.hm{display:none !important;position:fixed !important;inset:0 !important;z-index:9999 !important;background:rgba(0,0,0,.75) !important;backdrop-filter:blur(6px) !important;align-items:center !important;justify-content:center !important;padding:20px !important}
+.hm.show{display:flex !important}
 nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
 .nav-links{display:flex;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
@@ -255,7 +257,7 @@ footer a{color:var(--accent);text-decoration:none}
   <h2 class="sec">Un acuerdo claro, privado y verificable</h2>
   <p class="sec-sub">Menos malentendidos. Más constancia del acuerdo.</p>
   <div class="feats">
-    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada registro queda vinculado al anterior mediante hashes. Si se altera un dato registrado, la comprobación de integridad puede detectarlo. <a href="javascript:void(0)" onclick="document.getElementById('hash-modal').style.display='flex'" style="color:var(--accent);font-weight:600">¿Cómo funciona la cadena hash? →</a></p></div></div>
+    <div class="feat"><div class="ic">🔗</div><div><b>Integridad verificable</b><p>Cada registro queda vinculado al anterior mediante hashes. Si se altera un dato registrado, la comprobación de integridad puede detectarlo. <a href="javascript:void(0)" onclick="document.getElementById('hash-modal').classList.add('show')" style="color:var(--accent);font-weight:600">¿Cómo funciona la cadena hash? →</a></p></div></div>
     <div class="feat"><div class="ic">🔒</div><div><b>Comprobantes privados</b><p>Cada persona accede solo a su propio comprobante. Los nombres y aportaciones individuales no se publican.</p></div></div>
     <div class="feat"><div class="ic">🕵️</div><div><b>Verificación sin exponer datos</b><p>El QR permite consultar el estado del registro sin mostrar la identidad ni el importe de cada partícipe.</p></div></div>
     <div class="feat"><div class="ic">📄</div><div><b>Documento de constancia</b><p>Cada comprobante incluye los datos del acuerdo de participación y reparto, para conservarlos en PDF.</p></div></div>
@@ -292,9 +294,9 @@ footer a{color:var(--accent);text-decoration:none}
 </div>
 
 <!-- MODAL: Cómo funciona la cadena hash -->
-<div id="hash-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
+<div id="hash-modal" class="hm" onclick="if(event.target===this)this.classList.remove('show')">
 <div style="background:#070b18;border:1px solid #1c2a47;border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 25px 80px rgba(0,0,0,.5)">
-  <button onclick="document.getElementById('hash-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:#101b33;border:1px solid #1c2a47;color:#e8eefb;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+  <button onclick="document.getElementById('hash-modal').classList.remove('show')" style="position:absolute;top:16px;right:16px;background:#101b33;border:1px solid #1c2a47;color:#e8eefb;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
   <h2 style="margin:0 0 6px;font-size:22px;color:#e8eefb">🔗 Cómo funciona la cadena hash</h2>
   <p style="color:#8ba0c4;font-size:14px;margin:0 0 20px">El mecanismo que hace que un registro no se pueda alterar sin que se detecte.</p>
 
@@ -361,6 +363,7 @@ footer a{color:var(--accent);text-decoration:none}
     try { localStorage.setItem('tema', cur); } catch(e){}
   };
 })();
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var m=document.getElementById('hash-modal');if(m)m.classList.remove('show');}});
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/assets/sw.js'); });
 }

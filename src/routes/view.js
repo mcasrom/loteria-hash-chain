@@ -15,6 +15,7 @@ const { openDb } = require('../db/schema');
 const { computeChain, addParticipacion } = require('../db/chain');
 const crypto = require('crypto');
 const path = require('path');
+const QRCode = require('qrcode');
 const router = express.Router();
 const db = openDb();
 
@@ -82,14 +83,26 @@ a.btn-line:link,a.btn-line:visited,a.btn-line:hover,a.btn-line:active{color:#256
 </style>`;
 
 // 1. Raíz: landing completa y pulida (genérica para cualquier sorteo)
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const urlPagina = `${baseUrl}/`;
+  let qrPagina = '';
+  try {
+    qrPagina = await QRCode.toDataURL(urlPagina, {
+      width: 240,
+      margin: 1,
+      color: { dark: '#0f172a', light: '#ffffff' },
+      errorCorrectionLevel: 'M',
+    });
+  } catch (e) {
+    console.error('[qr-landing]', e.message);
+  }
   res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Registro verificable de participaciones</title>
-<meta name="description" content="Deja constancia de quién participa en un sorteo, boleto o reparto compartido, cuánto aporta y qué porcentaje le corresponde. Cada partícipe recibe un comprobante privado con QR y PDF.">
-<meta property="og:title" content="Registro verificable de participaciones">
-<meta property="og:description" content="Comparte una participación en un sorteo. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>Registro verificable de participaciones</title>
+ <meta name="description" content="Deja constancia de quién participa en un sorteo, boleto o reparto compartido, cuánto aporta y qué porcentaje le corresponde. Cada partícipe recibe un comprobante privado con QR y PDF.">
+ <meta property="og:title" content="Registro verificable de participaciones">
+ <meta property="og:description" content="Comparte una participación en un sorteo. Deja el reparto por escrito. Comprobantes privados con QR y PDF.">
 <meta property="og:image" content="${baseUrl}/assets/og-preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -311,6 +324,11 @@ footer a{color:var(--accent);text-decoration:none}
     <span style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#a78bfa;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px">📄 PDF</span>
   </div>
   <a href="#registrar" onclick="closeWelcome()" style="display:inline-block;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;padding:15px 36px;border-radius:12px;font-weight:800;font-size:16px;text-decoration:none;box-shadow:0 8px 30px rgba(37,99,235,.4)">🎟️ Crear mi registro</a>
+  ${qrPagina ? `<div style="margin:22px auto 0;border-top:1px solid #1c2a47;padding-top:18px;max-width:360px">
+    <img src="${qrPagina}" alt="QR del sitio" width="120" height="120"
+         style="border-radius:12px;background:#fff;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)" />
+    <p style="color:#8ba0c4;font-size:13px;margin:10px 0 0">📲 Escanea y abre la página en tu móvil</p>
+  </div>` : ''}
   <p style="color:#5b6b85;font-size:12px;margin:16px 0 0">Sin cuentas · Sin custodiar dinero · Cada uno recibe su comprobante privado</p>
 </div>
 </div>

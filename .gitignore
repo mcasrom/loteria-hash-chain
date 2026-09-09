@@ -7,3 +7,4 @@ output-samples/imagenes/
 output-samples/pdfs/
 .privado/
 .bsky_creds.env
+backups/

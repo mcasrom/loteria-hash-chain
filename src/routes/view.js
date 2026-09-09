@@ -469,16 +469,45 @@ router.get('/gestion/:token', (req, res) => {
   ${cerrado ? `<p class="muted" style="color:var(--ok)">Este reparto está cerrado. No se pueden añadir más participaciones.</p>${d.firmado_org_at ? `<p class="muted" style="font-size:12px;color:var(--ok)">✓ Firma del organizador registrada: ${esc(d.firmado_org_at)} (al cerrar el reparto).</p>` : ''}` : ''}
 </div>
 
+${cerrado ? `
 <div class="card">
 <h2>🔗 Enlaces del reparto</h2>
-<p class="muted" style="margin:0 0 10px">Tres enlaces diferenciados según a quién van destinados:</p>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-  <button class="btn" onclick="copyTexto('${enlaceParticipar}')">📤 Enlace de participación</button>
-  <button class="btn" onclick="window.open('https://wa.me/?text='+encodeURIComponent('Regístrate en este reparto: ${enlaceParticipar}'),'_blank')">📲 Compartir participación (WhatsApp)</button>
-  <a class="btn-line" href="${enlaceVerificar}" target="_blank">🔍 Verificación pública</a>
+<p class="muted" style="margin:0">Este reparto está <b>cerrado</b>: no se pueden añadir más participaciones ni generar nuevos enlaces de participación o de regalo. Solo queda disponible la <a class="btn-line" style="display:inline-block;padding:4px 12px;font-size:12px" href="${enlaceVerificar}" target="_blank">🔍 Verificación pública</a> (para QR/PDF/terceros, sin datos privados).</p>
 </div>
-<p class="muted" style="font-size:12px">· <b>Enlace de participación</b>: lo comparten con las personas invitadas.<br>· <b>Verificación pública</b>: para QR/PDF/terceros, sin datos privados.</p>
+` : `
+<div class="card">
+<h2>🔗 Enlaces del reparto</h2>
+<p class="muted" style="margin:0 0 10px">Dos enlaces distintos según cómo quieras invitar:</p>
+
+<div style="border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px">
+  <div style="font-weight:700;margin-bottom:6px">💶 Aportar dinero</div>
+  <p class="muted" style="font-size:12px;margin:0 0 8px">Para quien va a pagar su parte. Al abrir el enlace, introduce su nombre y el importe que aporta.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" onclick="copyTexto('${enlaceParticipar}')">📤 Copiar enlace de participación</button>
+    <button class="btn" onclick="window.open('https://wa.me/?text='+encodeURIComponent('¡Hola! Te invito a participar en este reparto (${esc(d.numero)} · ${esc(d.serie)}). Aporta tu parte aquí: ${enlaceParticipar}'),'_blank')">📲 Compartir participación (WhatsApp)</button>
+  </div>
 </div>
+
+<div style="border:1px solid var(--accent2);border-radius:12px;padding:14px">
+  <div style="font-weight:700;margin-bottom:6px">🎁 Regalar una participación</div>
+  <p class="muted" style="font-size:12px;margin:0 0 8px">Escribe el importe que quieres regalar (cuota que cubres tú). Se genera un enlace que al abrirlo dice: <b>«Te han regalado X € — introduce tu nombre para aceptar. No pagas nada.»</b> Al aceptarlo se registra como asignación gratuita (aportado 0 €, valor de referencia X €).</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input id="regalo-importe" type="number" step="0.01" min="0.01" max="${saldo > 0 ? saldo : 0}" placeholder="Importe del regalo €" style="width:170px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:14px">
+    <button class="btn" onclick="generarRegalo()">🎁 Generar enlace de regalo</button>
+  </div>
+  <div id="regalo-out" style="display:none;margin-top:10px">
+    <input readonly id="regalo-link" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:12px;margin-bottom:8px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="copyTexto(document.getElementById('regalo-link').value)">📋 Copiar enlace</button>
+      <button class="btn" onclick="window.open('https://wa.me/?text='+encodeURIComponent('🎁 Te he regalado '+document.getElementById('regalo-importe').value+' € de participación en '+${JSON.stringify(`${esc(d.numero)} · ${esc(d.serie)}`)}+'. Acepta tu regalo aquí: '+document.getElementById('regalo-link').value),'_blank')">📲 Enviar regalo (WhatsApp)</button>
+    </div>
+    <p class="muted" style="font-size:12px;margin:8px 0 0" id="regalo-msg"></p>
+  </div>
+</div>
+
+<p class="muted" style="font-size:12px;margin-top:12px">· <b>Verificación pública</b>: para QR/PDF/terceros, sin datos privados. <a class="btn-line" style="display:inline-block;padding:4px 12px;font-size:12px" href="${enlaceVerificar}" target="_blank">🔍 Abrir verificación pública</a></p>
+</div>
+`}
 
 <div class="card">
 <h2>Participaciones de TU reparto (${parts.length})</h2>
@@ -500,10 +529,11 @@ ${parts.map((p, i) => {
 </div>
 ${cerrado ? '' : `<div class="card">
 <h2>➕ Añadir una participación</h2>
+<p class="muted" style="font-size:13px;margin-top:0">Elige la modalidad y rellena los campos. La modalidad seleccionada <b>es la que se registra</b>: si marcas "regalo", se guarda como asignación gratuita con importe aportado 0 € y el importe que escribas pasa a ser el <b>valor de referencia</b> de la cuota.</p>
 <form class="join" data-decimo="${d.id}">
   <div class="join-row" style="margin-bottom:8px">
     <label style="font-size:13px;color:var(--mut)">Modalidad:</label>
-    <label style="font-size:13px"><input type="radio" name="modalidad" value="aportada" checked onchange="toggleModalidad()"> Aportada (pagó)</label>
+    <label style="font-size:13px"><input type="radio" name="modalidad" value="aportada" checked onchange="toggleModalidad()"> Aportada (pagó dinero)</label>
     <label style="font-size:13px"><input type="radio" name="modalidad" value="gratuita" onchange="toggleModalidad()"> Gratuita (regalo)</label>
   </div>
   <div class="join-row">
@@ -512,7 +542,7 @@ ${cerrado ? '' : `<div class="card">
     <button>Añadir</button>
   </div>
   <p class="msg"></p>
-  <p class="muted" id="mod-hint" style="font-size:12px;margin:4px 0 0">Modalidad <b>aportada</b>: el partícipe entrega dinero y recibe una cuota.</p>
+  <p class="muted" id="mod-hint" style="font-size:12px;margin:4px 0 0">Modalidad <b>aportada</b>: el partícipe entrega ese dinero y recibe una cuota del reparto.</p>
 </form>
 </div>`}
 <div class="card" style="text-align:center">
@@ -524,18 +554,27 @@ ${cerrado ? '' : `<div class="card">
 document.querySelector('.join') && document.querySelector('.join').addEventListener('submit', async function(ev){
   ev.preventDefault();
   var form=ev.target, did=form.dataset.decimo;
-  var nombre=form.querySelector('[name=nombre]').value;
+  var nombre=form.querySelector('[name=nombre]').value.trim();
   var importeEl=form.querySelector('[name=importe]');
   var importeVal=importeEl?importeEl.value.trim():'';
-  var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando tu comprobante...';
-  var body={nombre:nombre};
-  if(importeVal===''){body.modalidad='gratuita';}
-  else{body.modalidad='aportada';body.importe=parseFloat(importeVal);}
+  var msg=form.querySelector('.msg'); msg.className='msg';
+  if(!nombre){ msg.className='msg err'; msg.textContent='Escribe el nombre del partícipe.'; return; }
+  var mod=form.querySelector('input[name=modalidad]:checked').value;
+  var imp=parseFloat(importeVal);
+  var body;
+  if(mod==='aportada'){
+    if(!Number.isFinite(imp)||imp<=0){ msg.className='msg err'; msg.textContent='Indica el importe aportado (mayor que 0).'; return; }
+    body={nombre:nombre, modalidad:'aportada', importe:imp};
+  } else {
+    if(!Number.isFinite(imp)||imp<=0){ msg.className='msg err'; msg.textContent='Indica el valor de referencia de la cuota regalada (mayor que 0).'; return; }
+    body={nombre:nombre, modalidad:'gratuita', valorReferencia:imp};
+  }
+  msg.textContent='Generando comprobante...';
   var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
   msg.className='msg ok';
-  msg.innerHTML='✓ Comprobante: <a href="/mi-participacion/'+data.access_token+'">ver / enviar</a>';
+  msg.innerHTML='✓ '+(mod==='gratuita'?'Regalo registrado':'Aportación registrada')+'. <a href="/mi-participacion/'+data.access_token+'" target="_blank">Comprobante</a>';
   setTimeout(function(){location.reload();},1800);
 });
 function toggleModalidad(){
@@ -544,12 +583,25 @@ function toggleModalidad(){
   var hint=document.getElementById('mod-hint');
   var importe=f.querySelector('[name=importe]');
   if(m==='gratuita'){
-    importe.placeholder="Importe € (opcional)";
-    if(hint) hint.innerHTML='Modalidad <b>gratuita</b>: asignas una cuota del décimo sin que el partícipe pague nada. Se registra "importe aportado 0 €" y un valor de referencia.';
+    importe.placeholder="Valor de referencia € (cuota regalada)";
+    if(hint) hint.innerHTML='Modalidad <b>gratuita (regalo)</b>: asignas una cuota sin que el partícipe pague nada. El importe que escribas es el <b>valor de referencia</b> de la cuota (se registra importe aportado 0 €).';
   } else {
     importe.placeholder='Importe €';
-    if(hint) hint.innerHTML='Modalidad <b>aportada</b>: el partícipe entrega dinero y recibe una cuota.';
+    if(hint) hint.innerHTML='Modalidad <b>aportada</b>: el partícipe entrega ese dinero y recibe una cuota del reparto.';
   }
+}
+function generarRegalo(){
+  var inp=document.getElementById('regalo-importe');
+  var v=parseFloat((inp?inp.value.trim():'').replace(',', '.'));
+  var saldoMax=${saldo > 0 ? saldo : 0};
+  var msg=document.getElementById('regalo-msg');
+  if(!Number.isFinite(v)||v<=0){ if(msg)msg.textContent='Introduce un importe válido mayor que 0.'; return; }
+  if(v>saldoMax){ if(msg)msg.textContent='El importe supera el saldo disponible ('+saldoMax.toFixed(2)+' €).'; return; }
+  var link='${enlaceParticipar}?regalo='+v.toFixed(2);
+  document.getElementById('regalo-link').value=link;
+  document.getElementById('regalo-out').style.display='block';
+  var vEsp=(v.toFixed(2)).replace('.', ',');
+  if(msg) msg.innerHTML='Enlace de regalo generado. La persona que lo abra verá: <b>«Te han regalado '+vEsp+' € · introduce tu nombre para aceptar»</b> y podrá aceptarlo sin pagar nada.';
 }
 function compartir(link, nombre, did){
   var texto = '🎟️ Tu participación está registrada. Abre tu comprobante aquí: ' + link;
@@ -617,60 +669,133 @@ async function cerrarReparto(did, tok){
 </body></html>`);
 });
 
-// 3. Partícipe aporta su parte (sin ver a los demás)
+// 3. Partícipe participa (sin ver a los demás).
+//    Sin parámetro -> aportación: introduce nombre + el importe que aporta.
+//    ?regalo=<importe> -> invitación a un REGALO (gratuita): solo introduce su
+//    nombre para aceptar. La narrativa es distinta y explícita en cada caso.
 router.get('/participa/:decimoId', (req, res) => {
   const d = db.prepare('SELECT * FROM decimos WHERE id = ?').get(req.params.decimoId);
   if (!d) return res.status(404).send('Décimo no encontrado');
-  const chain = computeChain(db, d.id);
   const agg = resumen(d.id);
   const saldo = d.valor_total - agg.s;
   const pct = d.valor_total > 0 ? Math.min(100, (agg.s / d.valor_total) * 100) : 0;
+  const eur = (v) => (Number(v) || 0).toFixed(2).replace('.', ',') + ' €';
+  const completo = saldo <= 0;
+  const cerrado = d.estado === 'cerrado';
 
-  res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Participa en ${d.numero} (sorteo compartido)</title>${css}</head><body>
-<main>
-<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a></p>
-<div class="card">
-  <h1>🎟️ Participa en ${esc(d.numero)} · ${esc(d.serie)}</h1>
-  <p class="muted">${esc(d.sorteo)}</p>
+  // ?regalo=<importe> (acepta coma decimal). Null si ausente o inválido.
+  let regaloVal = null;
+  if (req.query.regalo !== undefined && req.query.regalo !== '') {
+    const v = Number(String(req.query.regalo).trim().replace(',', '.'));
+    if (Number.isFinite(v) && v > 0) regaloVal = v;
+  }
+  const esRegalo = regaloVal !== null;
+  const regaloAceptable = esRegalo && !cerrado && !completo && regaloVal <= saldo + 1e-9;
+
+  const titulo = esRegalo
+    ? `Te han regalado ${eur(regaloVal)} · ${d.numero}`
+    : `Participa en ${d.numero} (sorteo compartido)`;
+  const h1 = esRegalo
+    ? `🎁 Participación de regalo · ${esc(d.numero)}`
+    : `🎟️ Participa en ${esc(d.numero)} · ${esc(d.serie)}`;
+
+  // ---- Cabecera: narrativa explícita según el tipo de enlace ----
+  let cabecera;
+  if (esRegalo) {
+    if (regaloAceptable) {
+      cabecera = `
+  <div class="gift-note" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:12px;padding:14px 16px;margin:0 0 16px">
+    <div style="font-weight:800;font-size:16px;color:var(--accent)">🎁 Te han regalado ${eur(regaloVal)} de participación</div>
+    <p class="muted" style="margin:6px 0 0">No pagas nada: esta participación ya está cubierta por quien te envió este enlace.</p>
+  </div>`;
+    } else {
+      cabecera = `
+  <div class="gift-note" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);border-radius:12px;padding:14px 16px;margin:0 0 16px">
+    <div style="font-weight:800;font-size:15px;color:var(--err)">Este regalo ya no puede aceptarse</div>
+    <p class="muted" style="margin:6px 0 0">${cerrado ? 'El reparto ya está cerrado por su organizador: no se admiten nuevas participaciones.' : completo ? 'El reparto está completo.' : `Solo quedan ${eur(saldo)} disponibles, menos que los ${eur(regaloVal)} de este regalo.`} Pregunta a quien te lo envió.</p>
+  </div>`;
+    }
+  } else {
+    cabecera = cerrado ? `
+  <div class="gift-note" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);border-radius:12px;padding:14px 16px;margin:0 0 16px">
+    <div style="font-weight:800;font-size:15px;color:var(--err)">Este reparto está cerrado</div>
+    <p class="muted" style="margin:6px 0 0">Su organizador ya no admite nuevas participaciones. Si tenías un enlace para aportar, pregúntale directamente.</p>
+  </div>` : `
   <div class="kpis">
-    <div class="kpi"><b>${d.valor_total.toFixed(2)}€</b><span>total</span></div>
-    <div class="kpi"><b>${agg.s.toFixed(2)}€</b><span>ya aportado</span></div>
+    <div class="kpi"><b>${d.valor_total.toFixed(2)}€</b><span>importe total</span></div>
+    <div class="kpi"><b>${agg.s.toFixed(2)}€</b><span>ya registrado</span></div>
     <div class="kpi"><b>${saldo.toFixed(2)}€</b><span>disponible</span></div>
   </div>
   <div class="bar"><div style="width:${pct}%"></div></div>
-  <p class="muted">Introduce <b>tu nombre</b>. Si es aportada, indica la cantidad. No ves quién más participa. Al aportar recibes tu comprobante personal.</p>
-  ${saldo > 0 ? `<form class="join" data-decimo="${d.id}">
-    <div class="join-row" style="margin-bottom:8px">
-      <label style="font-size:13px;color:var(--mut)">Modalidad:</label>
-      <label style="font-size:13px"><input type="radio" name="modalidad" value="aportada" checked onchange="toggleModalidad()"> Aportada (pagó)</label>
-      <label style="font-size:13px"><input type="radio" name="modalidad" value="gratuita" onchange="toggleModalidad()"> Gratuita (regalo)</label>
-    </div>
+  <p class="muted" style="margin-top:0">Este enlace es para <b>aportar dinero</b> a un reparto compartido. Introduce tu nombre y la cantidad que quieres aportar (hasta ${eur(saldo)}). No ves quién más participa ni sus importes: cada persona registra su parte por separado.</p>`;
+  }
+
+  // ---- Formulario según el tipo ----
+  let form;
+  if (esRegalo) {
+    if (regaloAceptable) {
+      form = `
+  <form class="join" data-decimo="${d.id}" data-regalo="${regaloVal}">
+    <p style="margin:0 0 6px;font-weight:600">Solo tienes que decirnos tu nombre para aceptar:</p>
     <div class="join-row">
-      <input name="nombre" placeholder="Tu nombre" >
-      <input name="importe" type="number" step="0.01" min="0" max="${saldo}" placeholder="Importe € o Regalo" id="inp-importe">
-      <button>Aportar</button>
+      <input name="nombre" placeholder="Tu nombre" required autocomplete="name">
+      <button>🎁 Aceptar mi participación</button>
     </div>
     <p class="msg"></p>
-  </form>` : '<p class="full" style="color:#4ade80;font-weight:600">Este décimo ya está completo.</p>'}
+    <p class="muted" style="font-size:12px;margin:8px 0 0">Al aceptar recibirás tu comprobante personal (imagen + PDF) con esta participación de ${eur(regaloVal)} a tu nombre. Tu aportación es de 0,00 €.</p>
+  </form>`;
+    } else {
+      form = '';
+    }
+  } else {
+    form = (cerrado || completo)
+      ? '<p class="full" style="color:#4ade80;font-weight:600">Este reparto ya no admite nuevas participaciones.</p>'
+      : `
+  <form class="join" data-decimo="${d.id}">
+    <div class="join-row">
+      <input name="nombre" placeholder="Tu nombre" required autocomplete="name">
+      <input name="importe" type="number" step="0.01" min="0.01" max="${saldo}" placeholder="Importe € que aportas" required>
+      <button>💶 Aportar y recibir comprobante</button>
+    </div>
+    <p class="msg"></p>
+    <p class="muted" style="font-size:12px;margin:8px 0 0">Al aportar se registra tu participación y recibes tu comprobante personal (imagen + PDF) con tu porcentaje del reparto.</p>
+  </form>`;
+  }
+
+  res.send(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>${titulo}</title>${css}</head><body>
+<main>
+<p class="muted"><a href="javascript:history.back()">← Volver</a> · <a href="/">🏠 Inicio</a></p>
+<div class="card">
+  <h1>${h1}</h1>
+  <p class="muted">${esc(d.sorteo)}</p>
+  ${cabecera}
+  ${form}
 </div>
 </main>
 <script>
 document.querySelector('.join') && document.querySelector('.join').addEventListener('submit', async function(ev){
   ev.preventDefault();
   var form=ev.target, did=form.dataset.decimo;
-  var nombre=form.querySelector('[name=nombre]').value;
-  var importeEl=form.querySelector('[name=importe]');
-  var importeVal=importeEl?importeEl.value.trim():'';
-  var msg=form.querySelector('.msg'); msg.className='msg'; msg.textContent='Generando tu comprobante...';
-  var body={nombre:nombre};
-  if(importeVal===''){body.modalidad='gratuita';}
-  else{body.modalidad='aportada';body.importe=parseFloat(importeVal);}
+  var nombre=form.querySelector('[name=nombre]').value.trim();
+  var msg=form.querySelector('.msg'); msg.className='msg';
+  if(!nombre){ msg.className='msg err'; msg.textContent='Escribe tu nombre para continuar.'; return; }
+  var esRegalo = form.dataset.regalo !== undefined && form.dataset.regalo !== '';
+  var body;
+  msg.textContent='Generando tu comprobante...';
+  if(esRegalo){
+    body={nombre:nombre, modalidad:'gratuita', valorReferencia:parseFloat(form.dataset.regalo)};
+  } else {
+    var importeEl=form.querySelector('[name=importe]');
+    var imp=parseFloat(importeEl?importeEl.value.trim():'');
+    if(!Number.isFinite(imp)||imp<=0){ msg.className='msg err'; msg.textContent='Indica cuánto aportas (mayor que 0).'; return; }
+    body={nombre:nombre, modalidad:'aportada', importe:imp};
+  }
   var r=await fetch('/decimos/'+did+'/participaciones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   var data=await r.json();
   if(!r.ok){msg.className='msg err';msg.textContent=data.message||data.error;return;}
   msg.className='msg ok';
-  msg.innerHTML='✓ Aportación registrada. <a href="/mi-participacion/'+data.access_token+'"><b>Ver y descargar TU comprobante →</b></a>';
+  msg.innerHTML='✓ '+(esRegalo?'Regalo aceptado.':'Aportación registrada.')+' <a href="/mi-participacion/'+data.access_token+'"><b>Ver y descargar TU comprobante →</b></a>';
 });
 (function(){
   var root=document.documentElement;
@@ -722,11 +847,15 @@ router.get('/mi-participacion/:token', (req, res) => {
   <p class="muted">Comprobante personal. Solo quien tenga este enlace lo ve.</p>
   <div class="kpis">
     <div class="kpi"><b>${esc(d.numero)}</b><span>serie ${esc(d.serie)}</span></div>
-    <div class="kpi"><b>${esGratuita ? '0,00' : importeMostrado.toFixed(2)}€</b><span>tu aportación</span></div>
+    <div class="kpi"><b>${esGratuita ? '0,00' : importeMostrado.toFixed(2)}€</b><span>${esGratuita ? 'aportado por ti' : 'tu aportación'}</span></div>
     <div class="kpi"><b>${pct}%</b><span>de participación</span></div>
     <div class="kpi"><b>${esc(p.nombre_participante) || 'Anónimo'}</b><span>partícipe</span></div>
   </div>
-  ${esGratuita ? `<p class="muted" style="font-size:13px">Modalidad: <b>asignación gratuita</b> — te han regalado una cuota (valor de referencia ${p.importe.toFixed(2)}€). No has aportado dinero.</p>` : ''}
+  ${esGratuita
+    ? `<div style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:13.5px;line-height:1.55">
+        🎁 <b>Te han regalado esta participación</b> (valor de referencia ${p.importe.toFixed(2)}€). No has aportado dinero: la cuota está cubierta por quien te la envió. A efectos del reparto, tu cuota es del <b>${pct}%</b> sobre el valor total.
+      </div>`
+    : ''}
   ${yaAceptada
     ? `<p class="muted" style="font-size:13px;color:var(--ok)">✓ Aceptación registrada: ${esc(p.aceptado_at)} (enlace privado + confirmación).</p>`
     : `<div class="card" style="border-color:var(--accent2);margin-top:10px">

@@ -313,7 +313,7 @@ footer a{color:var(--accent);text-decoration:none}
 
 <!-- MODAL: Bienvenida + funnel -->
 <div id="welcome-modal" class="hm" onclick="if(event.target===this)closeWelcome()">
-<div style="background:#070b18;border:1px solid #1c2a47;border-radius:24px;max-width:520px;width:100%;padding:36px 32px 30px;position:relative;box-shadow:0 30px 90px rgba(0,0,0,.6);text-align:center">
+<div style="background:#070b18;border:1px solid #1c2a47;border-radius:24px;max-width:520px;width:100%;max-height:calc(100vh - 40px);overflow-y:auto;padding:36px 32px 30px;position:relative;box-shadow:0 30px 90px rgba(0,0,0,.6);text-align:center">
   <button onclick="closeWelcome()" style="position:absolute;top:14px;right:14px;background:transparent;border:none;color:#8ba0c4;font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:8px">✕</button>
   <div style="font-size:48px;margin-bottom:12px">🎟️</div>
   <h2 style="margin:0 0 8px;font-size:24px;color:#e8eefb;line-height:1.3">Comparte una participación.<br><span style="color:#f59e0b">Deja el reparto por escrito.</span></h2>

@@ -17,8 +17,12 @@ async function generarImagen({ participacionId, numero, serie, sorteo, importe, 
   const url = `${baseUrl}/mi-participacion/${accessToken}`;
   const qrBuf = await QRCode.toBuffer(url, { width: 240, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } });
 
-  const W = 800, H = 1000;
   const esGratuita = modalidad === 'gratuita';
+  // Alto dinámico: la participación gratuita tiene una fila más (valor de
+  // referencia) y el QR (240 px) compuesto en top=820 se salía del lienzo de
+  // 1000 px → se recortaba por abajo. Con 1180 el QR (820..1060) queda dentro
+  // de la tarjeta (40..1100) sin recortes.
+  const W = 800, H = esGratuita ? 1180 : 1000;
   const importeMostrado = esGratuita ? (importeAportado != null ? importeAportado : 0) : (importeAportado != null ? importeAportado : importe);
   const etiquetaImporte = esGratuita ? 'APORTADO' : 'APORTADO';
   const etiquetaValor = esGratuita ? 'VALOR DE REFERENCIA' : 'VALOR';
